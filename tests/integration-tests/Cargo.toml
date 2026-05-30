@@ -1,0 +1,11 @@
+[package]
+name = "integration-tests"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+local-store = { path = "../../crates/local-store" }
+chrono = { workspace = true }
+uuid = { workspace = true }
+tempfile = "3"

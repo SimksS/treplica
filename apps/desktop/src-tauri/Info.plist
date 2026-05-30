@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>O Treplica usa o microfone para transcrever sua voz durante reuniões ao vivo.</string>
+	<key>NSSystemAudioCaptureUsageDescription</key>
+	<string>O Treplica captura o áudio reproduzido no computador para transcrever chamadas e vídeos sem compartilhar a tela.</string>
+</dict>
+</plist>

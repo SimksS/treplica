@@ -1,0 +1,42 @@
+# Rust
+/target/
+**/*.rs.bk
+*.rlib
+*.prof*
+
+# Node / frontend
+node_modules/
+dist/
+build/
+*.log
+.npm
+.pnpm-store/
+
+# Tauri
+apps/desktop/src-tauri/target/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.vscode/
+.idea/
+
+# Test / coverage
+coverage/
+playwright-report/
+test-results/
+
+# Playwright
+/blob-report/
+
+# Updater signing (secret key never committed)
+apps/desktop/updater/*.key
+apps/desktop/updater-keys/
+**/credential-vault/.vault-master

@@ -1,0 +1,21 @@
+{
+  "guidance_request": {
+    "session_context": {
+      "role": "vendas",
+      "objective": "demonstrar ROI",
+      "audience": "diretoria"
+    },
+    "recent_transcript": [
+      {
+        "speaker_label": "Cliente",
+        "text": "Qual o ROI esperado?",
+        "confidence": 0.91
+      }
+    ],
+    "privacy_mode": "local_only"
+  },
+  "ollama_provider": {
+    "base_url": "http://127.0.0.1:11434",
+    "model": "llama3.2"
+  }
+}

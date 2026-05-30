@@ -1,0 +1,49 @@
+[package]
+name = "treplica-desktop"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Treplica open-source desktop meeting assistant"
+
+[lib]
+name = "treplica_desktop_lib"
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[[bin]]
+name = "treplica-desktop"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-global-shortcut = "2"
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+tokio = { workspace = true }
+rusqlite = { workspace = true }
+local-store = { path = "../../../crates/local-store" }
+provider-core = { path = "../../../crates/provider-core" }
+audio-core = { path = "../../../crates/audio-core" }
+keyring = "3"
+base64 = "0.22"
+aes-gcm = "0.10"
+rand = "0.8"
+url = "2"
+tauri-plugin-updater = "2"
+pdf-extract = "0.7"
+rfd = "0.15"
+walkdir = "2"
+xcap = "0.3"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
+cpal = "0.17"
+hound = "3.5"
+
+[dev-dependencies]
+tempfile = "3"
+
+[package.metadata.tauri]

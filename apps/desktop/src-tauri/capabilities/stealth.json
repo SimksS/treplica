@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schema.tauri.app/config/2/capability",
+  "identifier": "stealth-overlay",
+  "description": "Minimal capabilities for the stealth overlay window",
+  "windows": ["stealth"],
+  "permissions": [
+    "core:default",
+    "core:event:default",
+    "core:window:default",
+    "global-shortcut:default"
+  ]
+}

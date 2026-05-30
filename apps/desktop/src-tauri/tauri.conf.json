@@ -1,0 +1,72 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Treplica",
+  "version": "0.1.0",
+  "identifier": "com.treplica.desktop",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:5173",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Treplica",
+        "width": 1100,
+        "height": 720,
+        "resizable": true
+      },
+      {
+        "label": "stealth",
+        "title": "Treplica Overlay",
+        "width": 400,
+        "height": 640,
+        "resizable": true,
+        "decorations": false,
+        "alwaysOnTop": true,
+        "visible": false,
+        "skipTaskbar": true,
+        "transparent": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' ipc: http://ipc.localhost https://github.com https://*.githubusercontent.com; font-src 'self' data:"
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDZCQTE4OTA1NTE5ODhDN0IKUldSN2pKaFJCWW1oYTNvbjAxaCtYK2FWdDJyUjN0Tm1hd09lQVZ0V2I4dmQzeDlBSkJid3I4WlQKCg==",
+      "endpoints": [
+        "https://github.com/treplica/treplica/releases/latest/download/latest.json"
+      ],
+      "dialog": false
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["msi", "dmg"],
+    "category": "Productivity",
+    "shortDescription": "Assistente local para reuniões",
+    "longDescription": "Treplica é um assistente desktop local-first para transcrição, orientação em tempo real, tradução e histórico de reuniões. Dados permanecem no dispositivo; providers na nuvem são opcionais e auditados.",
+    "copyright": "Copyright © Treplica contributors",
+    "publisher": "Treplica",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "wix": {
+        "language": ["pt-BR", "en-US"]
+      }
+    },
+    "macOS": {
+      "minimumSystemVersion": "14.6",
+      "entitlements": "Entitlements.plist"
+    }
+  }
+}

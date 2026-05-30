@@ -652,6 +652,23 @@ export async function nativeMicrophoneSupported(): Promise<boolean> {
   return invoke<boolean>("native_microphone_supported");
 }
 
+/** Whether this platform offers native on-device speech recognition (macOS). */
+export async function nativeSpeechSupported(): Promise<boolean> {
+  return invoke<boolean>("native_speech_supported");
+}
+
+/** Current macOS native-speech opt-in setting. */
+export async function getMacosNativeSpeech(): Promise<CommandResponse<boolean>> {
+  return invokeCommand("get_macos_native_speech");
+}
+
+/** Enable/disable native macOS speech recognition (opt-in fallback). */
+export async function setMacosNativeSpeech(
+  enabled: boolean,
+): Promise<CommandResponse<boolean>> {
+  return invokeCommand("set_macos_native_speech", { enabled });
+}
+
 export async function listMicrophones(): Promise<MicrophoneDeviceDto[]> {
   return invoke<MicrophoneDeviceDto[]>("list_microphones");
 }

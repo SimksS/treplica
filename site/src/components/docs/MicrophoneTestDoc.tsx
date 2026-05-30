@@ -127,6 +127,13 @@ export default function MicrophoneTestDoc() {
           <p className="text-muted text-sm mt-3">
             O atalho de envio varia conforme a plataforma e é exibido no rodapé do painel de teste.
           </p>
+
+          <div className="flex items-start gap-3 p-4 mt-4 bg-amber-400/5 border border-amber-400/20 rounded-xl">
+            <svg className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+            <p className="text-sm text-muted m-0">
+              <strong className="text-white">macOS:</strong> o reconhecimento de voz do navegador (Web Speech) não funciona dentro do app — o WebView do sistema (WKWebView) bloqueia o serviço. Por isso, no macOS, a transcrição do microfone e do áudio do sistema usa um provedor de <strong className="text-white">Cloud STT</strong> (Whisper via Groq ou OpenAI), que precisa estar configurado em Provedores. No Windows, o Web Speech funciona como alternativa para o microfone.
+            </p>
+          </div>
         </div>
 
       </div>

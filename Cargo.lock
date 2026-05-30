@@ -5216,6 +5216,7 @@ dependencies = [
  "aes-gcm",
  "audio-core",
  "base64 0.22.1",
+ "cc",
  "chrono",
  "cpal",
  "hound",

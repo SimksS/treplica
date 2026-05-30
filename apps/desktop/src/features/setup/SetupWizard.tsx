@@ -325,12 +325,29 @@ export function SetupWizard({ onComplete }: Props) {
                 No teste, use <kbd>{sendLabel}</kbd> ou <kbd>{recordLabel}</kbd> para
                 gravar e enviar ({platform.displayName}).
               </p>
-              {!speechRecognitionSupported() && (
-                <p className="setup-hint">
-                  {platform.os === "macos"
-                    ? "No macOS, a transcrição do microfone nas reuniões usa o provedor de IA na nuvem (Whisper/Groq), não o reconhecimento de voz do navegador."
-                    : "Dica: execute com npm run tauri:dev para transcrição real no WebView2."}
-                </p>
+              {platform.os === "macos" ? (
+                <div
+                  className="setup-session-note"
+                  data-testid="setup-macos-stt-note"
+                  style={{ marginTop: "var(--space-md)" }}
+                >
+                  <strong>Transcrição no macOS</strong>
+                  <span>
+                    O reconhecimento de voz do navegador (Web Speech) não funciona
+                    no macOS — é uma limitação do WebView do sistema. Por isso, a
+                    transcrição do microfone e do áudio do sistema usa um provedor
+                    de IA na nuvem (Whisper via Groq ou OpenAI). Configure um na
+                    etapa anterior, "Conecte seus provedores", para transcrever
+                    suas reuniões.
+                  </span>
+                </div>
+              ) : (
+                !speechRecognitionSupported() && (
+                  <p className="setup-hint">
+                    Dica: execute com npm run tauri:dev para transcrição real no
+                    WebView2.
+                  </p>
+                )
               )}
             </div>
           )}

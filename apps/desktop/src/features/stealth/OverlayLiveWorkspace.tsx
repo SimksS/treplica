@@ -5,6 +5,7 @@ import { useCloudTranscription } from "../../hooks/useCloudTranscription";
 import { useGuidanceHotkey } from "../../hooks/useGuidanceHotkey";
 import { useMicrophoneLevel } from "../../hooks/useMicrophoneStream";
 import { useNativeMicrophone } from "../../hooks/useNativeMicrophone";
+import { useMacNativeSpeech } from "../../hooks/useMacNativeSpeech";
 import { useSnapshotMonitor } from "../../hooks/useSnapshotMonitor";
 import { speechRecognitionSupported } from "../../hooks/useSpeechRecognition";
 import * as api from "../../lib/tauriClient";
@@ -66,15 +67,23 @@ export function OverlayLiveWorkspace({
   const cloudStt = useCloudTranscription();
   const snapshotMonitor = useSnapshotMonitor(session.sessionId);
   const speech = useLiveSpeechControls(session);
+  const nativeSpeech = useMacNativeSpeech();
 
   const webSpeechOk = speechRecognitionSupported();
-  const canUseSystemStt = cloudStt.loaded && cloudStt.usable;
+  // The chunk-based pipeline (native cpal capture → STT) is available when a
+  // cloud provider is usable OR the macOS on-device recognizer is enabled. The
+  // recognizer runs inside transcribe_chunk, so the frontend just needs to know
+  // a backend exists and engage the same capture path.
+  const canUseSystemStt = (cloudStt.loaded && cloudStt.usable) || nativeSpeech.ready;
   // In transcription mode, prefer Web Speech API for mic: real-time, no VAD cutoff, no hallucinations.
   // In translation mode, force cloud STT so mic uses the same pipeline as system audio:
   //   audio → Whisper STT → ingestSystemAudioChunk → auto-translate.
   // This ensures "o fluxo deve ser sempre o mesmo" for both capture sources.
   const micUsesCloudStt = (!webSpeechOk || speech.speechMode === "translation") && canUseSystemStt;
   const useWebSpeechFallback = cloudStt.loaded && !cloudStt.usable && webSpeechOk;
+  // Mic transcription runs on-device (no cloud provider usable, native enabled).
+  const micUsesNativeMacSpeech =
+    micUsesCloudStt && nativeSpeech.ready && !(cloudStt.loaded && cloudStt.usable);
 
   useEffect(() => {
     if (!session.sessionId) return;
@@ -435,7 +444,12 @@ export function OverlayLiveWorkspace({
             targetLanguage={session.targetLanguage}
           />
         )}
-        {micUsesCloudStt && session.sessionId && (
+        {micUsesCloudStt && micUsesNativeMacSpeech && session.sessionId && (
+          <p className="stealth-hint" data-testid="overlay-stt-native-mic">
+            Microfone + áudio do sistema via <strong>reconhecimento nativo do macOS</strong> (on-device).
+          </p>
+        )}
+        {micUsesCloudStt && !micUsesNativeMacSpeech && session.sessionId && (
           <p className="stealth-hint" data-testid="overlay-stt-cloud-mic">
             Microfone + áudio do sistema via <strong>{cloudStt.sttModel ?? "Whisper"}</strong> ({cloudStt.providerDisplayName ?? "nuvem"}).
           </p>
@@ -448,6 +462,11 @@ export function OverlayLiveWorkspace({
         {useWebSpeechFallback && session.sessionId && (
           <p className="stealth-hint" data-testid="overlay-stt-fallback">
             Microfone via <strong>Web Speech</strong>. Configure Groq ou OpenAI em Provedores para transcrição na nuvem e áudio do sistema.
+          </p>
+        )}
+        {platform.os === "macos" && !micUsesCloudStt && session.sessionId && (
+          <p className="stealth-hint" data-testid="overlay-stt-macos-no-provider" role="alert">
+            No <strong>macOS</strong> a transcrição do microfone não usa Web Speech. Configure <strong>Groq</strong> ou <strong>OpenAI</strong> (Whisper) em Provedores, ou ative o <strong>reconhecimento nativo do macOS</strong> em Configurações → Microfone (offline).
           </p>
         )}
         <p className="stealth-hint">

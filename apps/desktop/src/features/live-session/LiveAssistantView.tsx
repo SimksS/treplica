@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useCloudTranscription } from "../../hooks/useCloudTranscription";
 import { useGuidanceHotkey } from "../../hooks/useGuidanceHotkey";
 import { speechRecognitionSupported } from "../../hooks/useSpeechRecognition";
+import { useMacNativeSpeech } from "../../hooks/useMacNativeSpeech";
 import * as api from "../../lib/tauriClient";
 import { unwrap } from "../../lib/tauriClient";
 import { formatSendShortcut } from "../../lib/platform";
@@ -59,10 +60,12 @@ export function LiveAssistantView({
     [session],
   );
 
+  const nativeSpeech = useMacNativeSpeech();
   const webSpeechOk = speechRecognitionSupported();
   const useWebSpeechFallback =
     cloudStt.loaded && !cloudStt.usable && webSpeechOk;
-  const micUsesCloudStt = cloudStt.loaded && cloudStt.usable;
+  const micUsesCloudStt =
+    (cloudStt.loaded && cloudStt.usable) || nativeSpeech.ready;
 
 
   useEffect(() => {
@@ -290,11 +293,12 @@ export function LiveAssistantView({
         {session.sessionId &&
           cloudStt.loaded &&
           !cloudStt.usable &&
-          !webSpeechOk && (
+          !webSpeechOk &&
+          !nativeSpeech.ready && (
             <p className="live-error" data-testid="stt-unavailable" role="alert">
-              Nenhuma API de transcrição e Web Speech indisponível neste
-              navegador. Configure um provedor STT ou use Chrome/Edge no app
-              desktop.
+              {platform.os === "macos"
+                ? "Nenhum provedor de transcrição configurado. No macOS, o reconhecimento de voz do navegador não funciona — configure um provedor STT na nuvem (Groq ou OpenAI/Whisper) em Configurações → Provedores, ou ative o reconhecimento nativo do macOS (offline) em Configurações → Microfone."
+                : "Nenhuma API de transcrição e Web Speech indisponível neste navegador. Configure um provedor STT ou use Chrome/Edge no app desktop."}
             </p>
           )}
         <p className="live-hint" data-testid="live-shortcut-hint">

@@ -6,5 +6,7 @@
 	<string>O Treplica usa o microfone para transcrever sua voz durante reuniões ao vivo.</string>
 	<key>NSSystemAudioCaptureUsageDescription</key>
 	<string>O Treplica captura o áudio reproduzido no computador para transcrever chamadas e vídeos sem compartilhar a tela.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>O Treplica usa o reconhecimento de fala do macOS para transcrever áudio localmente, sem enviar para a nuvem, quando você ativa essa opção.</string>
 </dict>
 </plist>

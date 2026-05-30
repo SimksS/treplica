@@ -69,6 +69,36 @@ impl SystemSttService {
             return Err("trecho de áudio excede o limite de 12 MB".into());
         }
 
+        // Opt-in macOS on-device path (SFSpeechRecognizer). When enabled, it
+        // fully replaces the cloud call for this chunk, so users can transcribe
+        // without configuring a cloud provider. Default stays cloud STT.
+        #[cfg(target_os = "macos")]
+        {
+            let use_native = state
+                .app_settings
+                .get()
+                .map(|s| s.macos_native_speech)
+                .unwrap_or(false);
+            if use_native {
+                use crate::audio::macos_speech;
+                let locale = macos_speech::locale_for_source(source_language.as_deref());
+                let detected = macos_speech::transcript_language_for_locale(&locale);
+                let bytes = audio_bytes.clone();
+                let loc = locale.clone();
+                let text = tokio::task::spawn_blocking(move || {
+                    macos_speech::transcribe_wav_bytes(&bytes, &loc, true)
+                })
+                .await
+                .map_err(|e| e.to_string())??;
+                let transcript_language =
+                    resolve_transcript_language(source_language.as_deref(), detected.as_deref());
+                return Ok(SttChunkResult {
+                    text,
+                    transcript_language,
+                });
+            }
+        }
+
         let (resolved, privacy) = state.with_repo_str(|repo| {
             let resolved = resolve_for_transcription(state, repo)?;
             let session = repo.get_session(session_id).map_err(|e| e.to_string())?;

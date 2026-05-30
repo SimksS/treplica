@@ -42,7 +42,7 @@ Durante a sessão, o overlay e a tela ao vivo mostram um resumo do modo de áudi
 
 - **Áudio do sistema**: capturado automaticamente ao iniciar a escuta (sem compartilhar tela no **Windows** e no **macOS 14.6+**). Trechos aparecem com o rótulo **Sistema**.
 - **Microfone**: capturado em paralelo com o áudio do PC. Use **Mutar microfone** para silenciar só a sua voz sem parar a transcrição do sistema.
-- **Transcrição**: requer provedor STT na nuvem (Groq/OpenAI com Whisper). Sem provedor, o app usa Web Speech apenas no microfone.
+- **Transcrição**: requer provedor STT na nuvem (Groq/OpenAI com Whisper). No **Windows**, sem provedor configurado, o microfone cai para o Web Speech do navegador (WebView2/Chromium). No **macOS** esse fallback **não existe** — o WebView do sistema (WKWebView) bloqueia o serviço de voz —, então a transcrição (microfone e áudio do sistema) **exige** um provedor de Cloud STT.
 - **Tradução**: painel com idioma alvo selecionado.
 - **Orientações**: sugestões em tempo real; indicador quando a IA está processando.
 - **Captura de tela**: analisa slide/código compartilhado (requer provider de visão configurado).
@@ -66,6 +66,8 @@ Referência completa (tabela Windows / macOS): site em **Documentação → Atal
 Na primeira captura de áudio do sistema, o macOS pode pedir autorização em **Ajustes do Sistema → Privacidade e Segurança → Gravação de áudio do sistema**. Sem essa permissão, o medidor de áudio do sistema pode ficar em zero.
 
 O microfone usa a permissão **Microfone** (separada).
+
+> **Transcrição no macOS exige Cloud STT.** O reconhecimento de voz do navegador (Web Speech API) não funciona dentro do app no macOS: o WKWebView expõe a API mas o serviço por trás dela retorna `service-not-allowed` — uma limitação da Apple para WebViews embutidos (só o Safari tem acesso). Portanto, no macOS, configure um provedor de Cloud STT (Groq ou OpenAI com Whisper) em **Configurações → Provedores** para transcrever microfone e áudio do sistema. (No Windows, o Web Speech funciona como fallback do microfone via WebView2/Chromium.)
 
 Em **Linux** ou macOS mais antigo que 14.6, o áudio do PC pode exigir **compartilhar a tela** com “áudio do sistema” marcado no diálogo do navegador.
 

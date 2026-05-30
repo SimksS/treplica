@@ -4,6 +4,8 @@ import {
   extractNewSpeechSegment,
   mergeCommittedTranscript,
 } from "../lib/speechRecognitionDelta";
+import { detectOperatingSystemSync } from "../lib/platform";
+import { isTauriRuntime } from "../lib/tauriEvents";
 
 type SpeechRecognitionCtor = new () => SpeechRecognitionInstance;
 
@@ -42,10 +44,21 @@ declare global {
 }
 
 export function speechRecognitionSupported(): boolean {
-  return Boolean(
-    typeof window !== "undefined" &&
-      (window.SpeechRecognition || window.webkitSpeechRecognition),
+  if (typeof window === "undefined") return false;
+  const hasCtor = Boolean(
+    window.SpeechRecognition || window.webkitSpeechRecognition,
   );
+  if (!hasCtor) return false;
+  // macOS WKWebView (the Tauri shell on Mac) exposes `webkitSpeechRecognition`
+  // but the backing speech service is blocked at runtime — every `start()` ends
+  // in `service-not-allowed`. The constructor's mere presence is a false
+  // positive, so callers (which would otherwise pick Web Speech over cloud STT)
+  // never get a working mic transcription on Mac. Treat it as unsupported there
+  // so they fall back to the cloud STT pipeline (Whisper/Groq), which works.
+  // Only inside the desktop shell: Safari proper supports Web Speech, and other
+  // platforms (Windows WebView2/Chromium) work fine.
+  if (isTauriRuntime() && detectOperatingSystemSync() === "macos") return false;
+  return true;
 }
 
 const BCP47 = new Set(["pt-BR", "en-US", "es-ES", "fr-FR"]);

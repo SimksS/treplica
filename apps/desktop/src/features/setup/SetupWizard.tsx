@@ -150,7 +150,9 @@ export function SetupWizard({ onComplete }: Props) {
       }
       if (!speech.supported) {
         setError(
-          "Transcrição por voz indisponível. No app Tauri (WebView2) ela deve funcionar; reinicie com npm run tauri:dev.",
+          platform.os === "macos"
+            ? "O teste de voz pelo navegador não está disponível no macOS. Durante as reuniões, a transcrição do microfone usa o provedor de IA na nuvem (Whisper/Groq) configurado na etapa de provedores."
+            : "Transcrição por voz indisponível. No app Tauri (WebView2) ela deve funcionar; reinicie com npm run tauri:dev.",
         );
         return;
       }
@@ -325,8 +327,9 @@ export function SetupWizard({ onComplete }: Props) {
               </p>
               {!speechRecognitionSupported() && (
                 <p className="setup-hint">
-                  Dica: execute com <code>npm run tauri:dev</code> para transcrição
-                  real no WebView2.
+                  {platform.os === "macos"
+                    ? "No macOS, a transcrição do microfone nas reuniões usa o provedor de IA na nuvem (Whisper/Groq), não o reconhecimento de voz do navegador."
+                    : "Dica: execute com npm run tauri:dev para transcrição real no WebView2."}
                 </p>
               )}
             </div>

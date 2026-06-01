@@ -15,7 +15,7 @@ import FinalCTA from "@/components/sections/FinalCTA";
 import { getLatestRelease, getDownloadUrls } from "@/lib/github";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://treplica.app";
-const REPO_URL = "https://github.com/treplica/treplica";
+const REPO_URL = "https://github.com/SimksS/treplica";
 
 export default async function Home() {
   const release = await getLatestRelease();

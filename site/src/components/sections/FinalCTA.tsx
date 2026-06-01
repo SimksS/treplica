@@ -17,9 +17,10 @@ export default function FinalCTA({ downloadUrls, version }: FinalCTAProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const elementsRef = useRef<HTMLDivElement>(null);
 
-  const windowsUrl = downloadUrls?.windows ?? "https://github.com/treplica/treplica/releases/latest";
-  const macosUrl = downloadUrls?.macos ?? "https://github.com/treplica/treplica/releases/latest";
-  const repoUrl = downloadUrls?.repo ?? "https://github.com/treplica/treplica";
+  const windowsUrl = downloadUrls?.windows ?? "https://github.com/SimksS/treplica/releases/latest";
+  const macosUrl = downloadUrls?.macos ?? "https://github.com/SimksS/treplica/releases/latest";
+  const linuxUrl = downloadUrls?.linux ?? "https://github.com/SimksS/treplica/releases/latest";
+  const repoUrl = downloadUrls?.repo ?? "https://github.com/SimksS/treplica";
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -79,7 +80,7 @@ export default function FinalCTA({ downloadUrls, version }: FinalCTAProps) {
         </p>
 
         {/* Platform Download Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 items-center justify-center w-full max-w-lg">
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-center w-full max-w-2xl">
           <a
             href={windowsUrl}
             target="_blank"
@@ -99,6 +100,19 @@ export default function FinalCTA({ downloadUrls, version }: FinalCTAProps) {
           >
             <Apple className="w-4 h-4" />
             macOS
+            <Download className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
+          </a>
+
+          <a
+            href={linuxUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full sm:w-auto flex-1 px-7 py-4 rounded-none text-xs font-bold uppercase tracking-wider text-white border border-white/30 hover:border-white hover:bg-white/5 transition-all duration-300 flex items-center justify-center gap-3 group"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489.117.779.567 1.563 1.182 2.114.623.553 1.293.877 2.007.87.32-.004.637-.07.953-.168 1.229-.38 1.872-1.357 2.273-1.884.418-.547.66-.734 1.042-.898.347-.15.822-.217 1.36-.217.506 0 .932.064 1.258.187.356.133.604.334 1.008.873.397.526 1.048 1.508 2.277 1.888.314.097.629.162.947.166.71.007 1.385-.316 2.01-.871.619-.552 1.072-1.337 1.19-2.118.125-.805-.007-1.658-.284-2.49-.592-1.77-1.836-3.47-2.717-4.521-.749-1.068-.972-1.928-1.049-3.021-.065-1.491 1.056-5.964-3.171-6.298-.165-.013-.325-.021-.48-.021z"/>
+            </svg>
+            Linux
             <Download className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
           </a>
         </div>
@@ -121,7 +135,7 @@ export default function FinalCTA({ downloadUrls, version }: FinalCTAProps) {
         <div className="flex flex-col gap-2 items-center border-t border-white/5 pt-8 w-full max-w-xl text-[10px] md:text-xs text-muted/60">
           <span className="flex items-center gap-1.5">
             <HelpCircle className="w-3.5 h-3.5" />
-            Compatibilidade: Windows 10/11 (x64) ou macOS 12+ (Apple Silicon ou Intel).
+            Compatibilidade: Windows 10/11 (x64), macOS 12+ (Apple Silicon ou Intel) ou Linux x64 (AppImage).
           </span>
           <span>
             Recomendado: 8GB+ de memória RAM para melhor desempenho com IA local.

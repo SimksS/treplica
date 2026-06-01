@@ -17,8 +17,8 @@ export default function Hero({ downloadUrls, version }: HeroProps) {
   const mockupRef = useRef<HTMLDivElement>(null);
   const badgeRef = useRef<HTMLDivElement>(null);
 
-  const releasesUrl = downloadUrls?.releases ?? "https://github.com/treplica/treplica/releases/latest";
-  const repoUrl = downloadUrls?.repo ?? "https://github.com/treplica/treplica";
+  const releasesUrl = downloadUrls?.releases ?? "https://github.com/SimksS/treplica/releases/latest";
+  const repoUrl = downloadUrls?.repo ?? "https://github.com/SimksS/treplica";
 
   useEffect(() => {
     const ctx = gsap.context(() => {

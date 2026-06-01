@@ -1,7 +1,11 @@
 import Image from "next/image";
 import { Shield, Terminal, BookOpen } from "lucide-react";
+import { getLatestRelease } from "@/lib/github";
 
-export default function Footer() {
+const REPO_URL = "https://github.com/SimksS/treplica";
+
+export default async function Footer() {
+  const release = await getLatestRelease();
   return (
     <footer className="bg-black border-t border-white/5 py-12 md:py-20 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
@@ -31,7 +35,7 @@ export default function Footer() {
             <div className="flex items-center gap-2 mt-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-                v0.1-beta
+                {release?.tag_name ?? "v0.1-beta"}
               </span>
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/5 text-white/80 border border-white/10">
                 Licença MIT
@@ -81,7 +85,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="https://github.com"
+                  href={REPO_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 hover:text-white transition-colors"

@@ -1,4 +1,4 @@
-const REPO = 'treplica/treplica';
+const REPO = 'SimksS/treplica';
 const RELEASES_URL = `https://github.com/${REPO}/releases/latest`;
 
 export interface ReleaseAsset {
@@ -19,6 +19,7 @@ export interface ReleaseInfo {
 export interface DownloadUrls {
   windows: string;
   macos: string;
+  linux: string;
   releases: string;
   repo: string;
 }
@@ -43,7 +44,7 @@ export function getDownloadUrls(release: ReleaseInfo | null): DownloadUrls {
   const repo = `https://github.com/${REPO}`;
 
   if (!release || release.assets.length === 0) {
-    return { windows: RELEASES_URL, macos: RELEASES_URL, releases: RELEASES_URL, repo };
+    return { windows: RELEASES_URL, macos: RELEASES_URL, linux: RELEASES_URL, releases: RELEASES_URL, repo };
   }
 
   const windows = release.assets.find(
@@ -54,5 +55,9 @@ export function getDownloadUrls(release: ReleaseInfo | null): DownloadUrls {
     (a) => a.name.endsWith('.dmg')
   )?.browser_download_url ?? RELEASES_URL;
 
-  return { windows, macos, releases: release.html_url, repo };
+  const linux = release.assets.find(
+    (a) => a.name.endsWith('.AppImage')
+  )?.browser_download_url ?? RELEASES_URL;
+
+  return { windows, macos, linux, releases: release.html_url, repo };
 }

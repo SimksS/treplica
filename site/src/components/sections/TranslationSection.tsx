@@ -115,7 +115,7 @@ export default function TranslationSection() {
     <section
       id="traducao"
       ref={containerRef}
-      className="relative min-h-screen w-full flex items-center justify-center bg-black overflow-hidden border-t border-white/5"
+      className="relative w-full py-20 md:py-0 md:min-h-screen flex items-center justify-center bg-black overflow-hidden border-t border-white/5"
     >
       {/* Wave canvas background */}
       <canvas
@@ -142,7 +142,7 @@ export default function TranslationSection() {
             <span className="text-gradient-electric italic font-light">De idioma.</span>
           </h2>
           <p className="text-muted text-base md:text-xl leading-relaxed font-light max-w-2xl mt-4">
-            O Treplica ouve chamadas em inglês, espanhol, alemão, francês ou mandarim e exibe transcrições traduzidas em tempo real diretamente na sua tela. Fale na sua língua nativa e entenda o mundo.
+            O Treplica ouve chamadas em português, inglês, espanhol, francês, alemão, italiano, japonês, chinês e outros idiomas — exibindo a tradução em tempo real diretamente na sua tela. Fale na sua língua e entenda qualquer reunião global.
           </p>
         </div>
       </div>

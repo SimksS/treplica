@@ -40,7 +40,7 @@ export default function UseCases() {
     <section
       id="cenarios"
       ref={containerRef}
-      className="relative min-h-screen w-full flex flex-col justify-center py-24 bg-black overflow-hidden border-t border-white/5"
+      className="relative w-full flex flex-col justify-center py-16 md:py-24 bg-black overflow-hidden border-t border-white/5"
     >
       <div className="absolute top-1/2 right-1/4 w-[500px] h-[500px] bg-neon-purple/5 rounded-full blur-[150px] pointer-events-none"></div>
 
@@ -53,9 +53,10 @@ export default function UseCases() {
             <div className="relative w-full h-full rounded-[10px] overflow-hidden">
               <Image
                 src="/images/use-cases.png"
-                alt="Use cases scenario mockups"
+                alt="Cenários de uso do Treplica"
                 fill
-                className="object-cover object-center opacity-85 hover:scale-[1.02] transition-transform duration-700"
+                quality={100}
+                className="object-contain object-center opacity-90 hover:scale-[1.02] transition-transform duration-700"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
             </div>

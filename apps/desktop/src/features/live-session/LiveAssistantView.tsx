@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useCloudTranscription } from "../../hooks/useCloudTranscription";
 import { useGuidanceHotkey } from "../../hooks/useGuidanceHotkey";
 import { speechRecognitionSupported } from "../../hooks/useSpeechRecognition";
-import { useMacNativeSpeech } from "../../hooks/useMacNativeSpeech";
 import * as api from "../../lib/tauriClient";
 import { unwrap } from "../../lib/tauriClient";
 import { formatSendShortcut } from "../../lib/platform";
@@ -60,12 +59,10 @@ export function LiveAssistantView({
     [session],
   );
 
-  const nativeSpeech = useMacNativeSpeech();
   const webSpeechOk = speechRecognitionSupported();
   const useWebSpeechFallback =
     cloudStt.loaded && !cloudStt.usable && webSpeechOk;
-  const micUsesCloudStt =
-    (cloudStt.loaded && cloudStt.usable) || nativeSpeech.ready;
+  const micUsesCloudStt = cloudStt.loaded && cloudStt.usable;
 
 
   useEffect(() => {
@@ -293,11 +290,10 @@ export function LiveAssistantView({
         {session.sessionId &&
           cloudStt.loaded &&
           !cloudStt.usable &&
-          !webSpeechOk &&
-          !nativeSpeech.ready && (
+          !webSpeechOk && (
             <p className="live-error" data-testid="stt-unavailable" role="alert">
               {platform.os === "macos"
-                ? "Nenhum provedor de transcrição configurado. No macOS, o reconhecimento de voz do navegador não funciona — configure um provedor STT na nuvem (Groq ou OpenAI/Whisper) em Configurações → Provedores, ou ative o reconhecimento nativo do macOS (offline) em Configurações → Microfone."
+                ? "Nenhum provedor de transcrição configurado. No macOS, o reconhecimento de voz do navegador não funciona, então a transcrição exige um provedor STT na nuvem — configure Groq ou OpenAI (Whisper) em Configurações → Provedores."
                 : "Nenhuma API de transcrição e Web Speech indisponível neste navegador. Configure um provedor STT ou use Chrome/Edge no app desktop."}
             </p>
           )}

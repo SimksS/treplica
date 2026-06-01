@@ -203,9 +203,6 @@ pub fn run() {
             commands::audio_capture_commands::set_native_microphone_muted,
             commands::audio_capture_commands::system_audio_bridge,
             commands::audio_capture_commands::microphone_bridge,
-            commands::settings_commands::native_speech_supported,
-            commands::settings_commands::get_macos_native_speech,
-            commands::settings_commands::set_macos_native_speech,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

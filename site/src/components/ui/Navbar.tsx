@@ -2,9 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Menu, X, ArrowRight } from "lucide-react";
+import { Menu, X, ArrowRight, FlaskConical } from "lucide-react";
 
-export default function Navbar() {
+interface NavbarProps {
+  repoUrl?: string;
+}
+
+export default function Navbar({ repoUrl = "https://github.com/treplica/treplica" }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -24,13 +28,21 @@ export default function Navbar() {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         isScrolled
-          ? "py-4 bg-black/80 backdrop-blur-md border-b border-white/5"
-          : "py-6 bg-transparent"
+          ? "pb-4 pt-0 bg-black/80 backdrop-blur-md border-b border-white/5"
+          : "pb-6 pt-2 bg-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
+      {/* Beta Banner */}
+      <div className="w-full bg-amber-500/10 border-b border-amber-500/20 px-4 py-1.5 flex items-center justify-center gap-2 mb-4">
+        <FlaskConical className="w-3 h-3 text-amber-400 shrink-0" />
+        <span className="text-[11px] font-medium text-amber-300 text-center">
+          Versão Beta — O Treplica está em desenvolvimento ativo. Recursos podem mudar.
+        </span>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 lg:px-12 flex items-center">
         {/* Logo */}
-        <a href="/" className="flex items-center gap-3 group">
+        <a href="/" className="flex items-center gap-3 group flex-shrink-0">
           <Image
             src="/images/logo_treplica.png"
             alt="Treplica"
@@ -49,49 +61,49 @@ export default function Navbar() {
         </a>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-5 lg:gap-8 ml-8 lg:ml-12 whitespace-nowrap min-w-0 flex-shrink">
           <a
             href="/#transcricao"
-            className="text-sm font-medium text-muted hover:text-white transition-colors duration-300"
+            className="text-xs lg:text-sm font-medium text-muted hover:text-white transition-colors duration-300"
           >
             Recursos
           </a>
           <a
             href="/#como-funciona"
-            className="text-sm font-medium text-muted hover:text-white transition-colors duration-300"
+            className="text-xs lg:text-sm font-medium text-muted hover:text-white transition-colors duration-300"
           >
             Como Funciona
           </a>
           <a
             href="/#overlay"
-            className="text-sm font-medium text-muted hover:text-white transition-colors duration-300"
+            className="text-xs lg:text-sm font-medium text-muted hover:text-white transition-colors duration-300"
           >
             Overlay
           </a>
           <a
             href="/#compatibilidade"
-            className="text-sm font-medium text-muted hover:text-white transition-colors duration-300"
+            className="text-xs lg:text-sm font-medium text-muted hover:text-white transition-colors duration-300"
           >
             Compatibilidade
           </a>
           <a
             href="/#open-source"
-            className="text-sm font-medium text-muted hover:text-white transition-colors duration-300"
+            className="text-xs lg:text-sm font-medium text-muted hover:text-white transition-colors duration-300"
           >
             Open Source
           </a>
           <a
             href="/docs"
-            className="text-sm font-medium text-neon-blue hover:text-white transition-colors duration-300"
+            className="hidden lg:block text-xs lg:text-sm font-medium text-neon-blue hover:text-white transition-colors duration-300"
           >
             Documentação
           </a>
         </div>
 
         {/* Action Buttons */}
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-4 ml-auto">
           <a
-            href="https://github.com"
+            href={repoUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="p-2 text-muted hover:text-white transition-colors duration-300"
@@ -113,7 +125,7 @@ export default function Navbar() {
         {/* Mobile menu button */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden p-2 text-muted hover:text-white focus:outline-none"
+          className="md:hidden ml-auto p-2 text-muted hover:text-white focus:outline-none"
         >
           {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
@@ -167,7 +179,7 @@ export default function Navbar() {
           <div className="h-px bg-white/10 my-2"></div>
           <div className="flex items-center justify-between">
             <a
-              href="https://github.com"
+              href={repoUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-muted hover:text-white text-sm"
@@ -178,7 +190,7 @@ export default function Navbar() {
               Ver Código
             </a>
             <a
-              href="#download"
+              href="/#download"
               onClick={() => setMobileMenuOpen(false)}
               className="px-5 py-3 rounded-full text-xs font-semibold uppercase tracking-wider text-black bg-white hover:bg-white/90 text-center shadow-[0_0_20px_rgba(255,255,255,0.15)]"
             >
@@ -190,4 +202,3 @@ export default function Navbar() {
     </nav>
   );
 }
-

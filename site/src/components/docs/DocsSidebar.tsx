@@ -51,7 +51,7 @@ export default function DocsSidebar() {
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 h-screen w-72 bg-black border-r border-white/5 pt-24 pb-6 px-6 flex flex-col transition-transform duration-300 z-40 ${
+        className={`fixed lg:sticky top-0 left-0 h-screen w-72 bg-black border-r border-white/5 pt-28 pb-6 px-6 flex flex-col transition-transform duration-300 z-40 ${
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >

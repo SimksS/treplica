@@ -11,19 +11,55 @@ import UseCases from "@/components/sections/UseCases";
 import Marquee from "@/components/sections/Marquee";
 import Compatibility from "@/components/sections/Compatibility";
 import OpenSource from "@/components/sections/OpenSource";
-import Partners from "@/components/sections/Partners";
 import FinalCTA from "@/components/sections/FinalCTA";
+import { getLatestRelease, getDownloadUrls } from "@/lib/github";
 
-export default function Home() {
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://treplica.app";
+const REPO_URL = "https://github.com/treplica/treplica";
+
+export default async function Home() {
+  const release = await getLatestRelease();
+  const downloadUrls = getDownloadUrls(release);
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Treplica",
+    url: SITE_URL,
+    downloadUrl: downloadUrls.releases,
+    operatingSystem: "Windows 10+, macOS 12+",
+    applicationCategory: "BusinessApplication",
+    applicationSubCategory: "Meeting Assistant",
+    softwareVersion: release?.tag_name ?? "0.1.0-beta",
+    description:
+      "Assistente desktop local-first para transcrição em tempo real, orientação de IA e tradução de reuniões. 100% privado, gratuito e código aberto.",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "BRL",
+    },
+    author: {
+      "@type": "Organization",
+      name: "Treplica",
+      url: REPO_URL,
+    },
+    license: REPO_URL,
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       {/* Global Transparent Header */}
-      <Navbar />
+      <Navbar repoUrl={REPO_URL} />
 
       {/* Main Container */}
       <main className="flex flex-col w-full bg-black">
         {/* 1. Hero Section */}
-        <Hero />
+        <Hero downloadUrls={downloadUrls} version={release?.tag_name} />
 
         {/* 2. Feature Highlight: Live Transcription */}
         <LiveTranscription />
@@ -52,14 +88,11 @@ export default function Home() {
         {/* 10. Compatibility Grid */}
         <Compatibility />
 
-        {/* 11. Open Source Selector (3 variants) */}
+        {/* 11. Open Source / Free features */}
         <OpenSource />
 
-        {/* 12. Tech Partners Logos */}
-        <Partners />
-
-        {/* 13. Final CTA */}
-        <FinalCTA />
+        {/* 12. Final CTA */}
+        <FinalCTA downloadUrls={downloadUrls} version={release?.tag_name} />
       </main>
 
       {/* Global Minimal Footer */}

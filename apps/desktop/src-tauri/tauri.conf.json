@@ -46,7 +46,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["msi", "dmg"],
+    "targets": ["msi", "dmg", "appimage", "deb"],
     "category": "Productivity",
     "shortDescription": "Assistente local para reuniões",
     "longDescription": "Treplica é um assistente desktop local-first para transcrição, orientação em tempo real, tradução e histórico de reuniões. Dados permanecem no dispositivo; providers na nuvem são opcionais e auditados.",

@@ -18,9 +18,10 @@ export default function HowItWorks() {
     {
       title: "01 / Configuração Inicial",
       subtitle: "Personalize seu assistente",
-      desc: "Escolha seu provedor de IA preferido — Ollama local, Groq, OpenAI, Gemini ou qualquer API compatível — configure o idioma da reunião e preencha o contexto de sessão com informações como produto, empresa e objetivos para calibrar o assistente.",
+      desc: "Configure o assistente com informações sobre seu produto, empresa e objetivos da reunião. Escolha se prefere IA rodando offline na sua máquina ou conectada à nuvem — o Treplica se adapta à sua preferência.",
       icon: Settings,
-      image: "/images/ai-guidance.png"
+ image: "/images/greetings-step-1.png"
+     
     },
     {
       title: "02 / Escuta Ativa e Fluida",
@@ -32,9 +33,9 @@ export default function HowItWorks() {
     {
       title: "03 / Dominação Absoluta",
       subtitle: "Orientação e sugestões na tela",
-      desc: "Receba tópicos de respostas, soluções de objeções e alertas com dados chaves baseados no contexto pré-carregado. Ao fim, salve um sumário completo de decisões com o histórico indexado em SQLite.",
+      desc: "Receba tópicos de respostas, soluções de objeções e alertas com dados-chave baseados no contexto pré-carregado. Ao fim, salve um sumário completo de decisões com histórico local.",
       icon: Trophy,
-      image: "/images/hero-mockup.png"
+      image: "/images/ai-guidance.png"
     }
   ];
 
@@ -111,7 +112,7 @@ export default function HowItWorks() {
           {/* Sticky Tab grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center min-h-[420px]">
             {/* Left Col: Step descriptions (lg:col-span-5) */}
-            <div className="lg:col-span-5 flex flex-col gap-6 transition-all duration-500 ease-out">
+            <div className="lg:col-span-5 relative min-h-[280px] flex flex-col gap-6 transition-all duration-500 ease-out">
               {steps.map((step, idx) => {
                 const StepIcon = step.icon;
                 const isActive = idx === activeStep;
@@ -120,8 +121,8 @@ export default function HowItWorks() {
                     key={idx}
                     className={`flex flex-col gap-4 transition-all duration-500 ${
                       isActive
-                        ? "opacity-100 transform translate-x-0 pointer-events-auto"
-                        : "opacity-0 absolute transform -translate-x-4 pointer-events-none"
+                        ? "opacity-100 translate-x-0 pointer-events-auto"
+                        : "opacity-0 absolute inset-0 -translate-x-4 pointer-events-none"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -150,7 +151,7 @@ export default function HowItWorks() {
                 return (
                   <div
                     key={idx}
-                    className={`absolute inset-1.5 rounded-[10px] overflow-hidden transition-all duration-700 ease-out ${
+                    className={`absolute inset-1.5 rounded-[10px] overflow-hidden bg-zinc-950 transition-all duration-700 ease-out ${
                       isActive
                         ? "opacity-90 scale-100"
                         : "opacity-0 scale-95 pointer-events-none"
@@ -160,7 +161,8 @@ export default function HowItWorks() {
                       src={step.image}
                       alt={step.title}
                       fill
-                      className="object-cover object-top"
+                      quality={100}
+                      className="object-contain object-top"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
                   </div>

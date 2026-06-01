@@ -1,0 +1,106 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish-tauri:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # macOS universal binary (Apple Silicon + Intel)
+          - platform: macos-latest
+            rust-targets: aarch64-apple-darwin,x86_64-apple-darwin
+            args: --target universal-apple-darwin
+          # Windows x64
+          - platform: windows-latest
+            rust-targets: ''
+            args: ''
+          # Linux (AppImage + .deb)
+          - platform: ubuntu-22.04
+            rust-targets: ''
+            args: --bundles appimage,deb
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/desktop/package-lock.json
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust-targets }}
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: ./apps/desktop/src-tauri -> target
+
+      - name: Install Linux system dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev
+
+      - name: Install frontend dependencies
+        working-directory: apps/desktop
+        run: npm ci
+
+      - name: Build and publish release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Required: generate with `tauri signer generate` and add to repo secrets
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          # Optional (macOS notarization — needed for distribution without "unknown developer" warning)
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: Treplica ${{ github.ref_name }}
+          releaseBody: |
+            ## O que há de novo
+
+            Veja o [CHANGELOG](https://github.com/treplica/treplica/blob/main/CHANGELOG.md) para detalhes desta versão.
+
+            ## Instalação
+
+            - **Windows:** baixe o arquivo `.msi` e execute o instalador.
+            - **macOS:** baixe o arquivo `.dmg`, abra e arraste para Aplicativos.
+              > Se aparecer aviso "desenvolvedor não identificado", clique com botão direito → Abrir.
+            - **Linux (Ubuntu/Debian):** baixe o arquivo `.deb` e instale com `sudo dpkg -i treplica_*.deb`.
+            - **Linux (outras distros):** baixe o `.AppImage`, torne executável com `chmod +x` e execute diretamente.
+
+            ## Requisitos mínimos
+
+            - Windows 10/11 (x64)
+            - macOS 12+ (Apple Silicon ou Intel)
+            - Linux x64 (Ubuntu 22.04+ ou equivalente)
+            - 8 GB de RAM recomendado para IA local
+          releaseDraft: true
+          prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') || contains(github.ref_name, 'rc') }}
+          projectPath: apps/desktop
+          args: ${{ matrix.args }}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Check, ArrowRight, Star } from "lucide-react";
+import { Check, ArrowRight, Shield, Sparkles, Globe, FileText, Mic, EyeOff, Zap, Lock } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -9,60 +9,22 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function OpenSource() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const cardsRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
 
-  const tiers = [
-    {
-      name: "Treplica Community",
-      price: "Grátis",
-      desc: "Ideal para desenvolvedores e entusiastas de IA local.",
-      features: [
-        "Transcrição Whisper Local ilimitada",
-        "Conexão direta com Ollama",
-        "Modo Stealth em qualquer chamada",
-        "Histórico local SQLite",
-        "Licença de código aberto MIT"
-      ],
-      cta: "Baixar Grátis",
-      popular: false,
-      badge: "Código Aberto"
-    },
-    {
-      name: "Treplica Pro Edition",
-      price: "Grátis",
-      desc: "Perfeito para profissionais liberais, consultores e líderes.",
-      features: [
-        "Tudo da versão Community",
-        "Tradução de áudio em tempo real",
-        "Presets avançados (Vendas, Entrevistas, Geral)",
-        "Integração com APIs cloud (Groq, OpenAI, Gemini)",
-        "Contexto de sessão configurável (8 campos)",
-        "Exportação de resumos e follow-ups em Markdown"
-      ],
-      cta: "Baixar Grátis (Completo)",
-      popular: true,
-      badge: "Recomendado"
-    },
-    {
-      name: "Treplica Enterprise",
-      price: "Grátis",
-      desc: "Excelente para equipes independentes que exigem privacidade absoluta.",
-      features: [
-        "Tudo da versão Pro",
-        "Roteamento por tarefa (STT, orientação, tradução, visão)",
-        "LM Studio e provedores custom compatíveis com OpenAI",
-        "Zero telemetria ou rastreamento de qualquer tipo",
-        "Controle total sobre dados, modelos e infraestrutura"
-      ],
-      cta: "Clonar Repositório",
-      popular: false,
-      badge: "Sem Limites"
-    }
+  const features = [
+    { icon: Mic, label: "Transcrição ao vivo ilimitada", desc: "Captura e transcreve toda conversa em tempo real, sem limites de uso." },
+    { icon: Sparkles, label: "Orientação de IA em tempo real", desc: "Sugestões de respostas e alertas estratégicos gerados automaticamente durante a reunião." },
+    { icon: EyeOff, label: "Modo Stealth invisível", desc: "Painel flutuante visível apenas para você — ninguém mais vê na câmera." },
+    { icon: Globe, label: "Tradução instantânea de áudio", desc: "Entenda reuniões em outros idiomas com tradução exibida diretamente na tela." },
+    { icon: Zap, label: "Presets de sessão configuráveis", desc: "Configure o assistente para vendas, entrevistas, apresentações e muito mais." },
+    { icon: FileText, label: "Exportação de resumos", desc: "Gere resumos, follow-ups e transcrições completas com um clique." },
+    { icon: Shield, label: "Histórico local completo", desc: "Todas as sessões são salvas somente na sua máquina. Sem nuvem, sem vazamentos." },
+    { icon: Lock, label: "Zero telemetria e rastreamento", desc: "Nenhuma informação sua sai do seu computador. Nunca." },
   ];
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const cards = cardsRef.current?.children;
+      const cards = gridRef.current?.children;
       if (cards) {
         gsap.fromTo(
           Array.from(cards),
@@ -71,10 +33,10 @@ export default function OpenSource() {
             opacity: 1,
             y: 0,
             duration: 1.2,
-            stagger: 0.25,
+            stagger: 0.1,
             ease: "power3.out",
             scrollTrigger: {
-              trigger: cardsRef.current,
+              trigger: gridRef.current,
               start: "top 75%",
               toggleActions: "play none none reverse",
             },
@@ -89,87 +51,68 @@ export default function OpenSource() {
     <section
       id="open-source"
       ref={containerRef}
-      className="relative min-h-screen w-full flex flex-col justify-center py-24 bg-black overflow-hidden border-t border-white/5"
+      className="relative w-full flex flex-col justify-center py-24 bg-black overflow-hidden border-t border-white/5"
     >
-      {/* Premium backgrounds */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-neon-blue/5 rounded-full blur-[160px] pointer-events-none"></div>
 
       <div className="max-w-7xl mx-auto px-6 md:px-12 z-10 w-full flex flex-col items-center">
-        
+
         {/* Title */}
-        <div className="text-center max-w-3xl mb-20">
+        <div className="text-center max-w-3xl mb-16">
           <span className="text-xs font-semibold uppercase tracking-[0.25em] text-neon-blue mb-3 block">
-            CUSTO ZERO • LICENÇA MIT
+            TUDO INCLUÍDO • GRATUITO PARA SEMPRE
           </span>
           <h2 className="font-display text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-6">
-            Sem Custos. <br />
-            <span className="text-gradient-electric italic font-light">Sem limites. Sem conta.</span>
+            Sem Planos. Sem Limites. <br />
+            <span className="text-gradient-electric italic font-light">100% gratuito.</span>
           </h2>
           <p className="text-muted text-base md:text-lg leading-relaxed font-light">
-            O Treplica é construído sobre a filosofia de software livre. Todo o código é auditável, aberto e você não precisa pagar mensalidades de IA para ter um assistente profissional.
+            O Treplica é código aberto e gratuito para sempre. Baixe uma vez e use todas as funcionalidades sem pagar nada — hoje, amanhã e sempre.
           </p>
         </div>
 
-        {/* 3 Cards */}
+        {/* Features Grid */}
         <div
-          ref={cardsRef}
-          className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full items-stretch"
+          ref={gridRef}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full mb-16"
         >
-          {tiers.map((tier, idx) => (
-            <div
-              key={idx}
-              className={`flex flex-col justify-between p-8 rounded-none transition-all duration-500 relative ${
-                tier.popular
-                  ? "bg-zinc-950 border-2 border-white lg:scale-[1.03] z-10 shadow-[0_20px_50px_rgba(255,255,255,0.08)]"
-                  : "bg-black border border-white/10 hover:border-white/30"
-              }`}
-            >
-              {/* Badge */}
-              <div className="flex justify-between items-start mb-8">
-                <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full ${
-                  tier.popular ? "bg-white text-black" : "bg-white/5 text-white/80 border border-white/10"
-                }`}>
-                  {tier.badge}
-                </span>
-                {tier.popular && <Star className="w-4 h-4 text-neon-blue fill-neon-blue" />}
-              </div>
-
-              {/* Title & Price */}
-              <div className="mb-8">
-                <h3 className="font-display text-xl font-bold text-white mb-3">{tier.name}</h3>
-                <div className="flex items-baseline gap-1">
-                  <span className="font-display text-5xl font-black text-white">{tier.price}</span>
-                  <span className="text-xs text-muted">/ para sempre</span>
-                </div>
-                <p className="text-xs text-muted mt-3 min-h-[32px]">{tier.desc}</p>
-              </div>
-
-              {/* Features */}
-              <ul className="flex flex-col gap-4 border-t border-white/5 pt-6 mb-8 text-sm grow">
-                {tier.features.map((feat, fIdx) => (
-                  <li key={fIdx} className="flex gap-3">
-                    <Check className={`w-4 h-4 shrink-0 mt-0.5 ${
-                      tier.popular ? "text-neon-blue" : "text-white"
-                    }`} />
-                    <span className="text-muted leading-relaxed">{feat}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {/* CTA Button */}
-              <a
-                href="#download"
-                className={`w-full py-4 rounded-none text-xs font-bold uppercase tracking-wider text-center flex items-center justify-center gap-2 group transition-all duration-300 ${
-                  tier.popular
-                    ? "bg-white text-black hover:bg-white/95"
-                    : "bg-transparent text-white border border-white/20 hover:border-white hover:bg-white/5"
-                }`}
+          {features.map((feat, idx) => {
+            const Icon = feat.icon;
+            return (
+              <div
+                key={idx}
+                className="flex flex-col gap-3 p-6 bg-zinc-950 border border-white/10 hover:border-white/30 transition-all duration-300"
               >
-                {tier.cta}
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-              </a>
-            </div>
-          ))}
+                <div className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+                  <Icon className="w-4 h-4 text-neon-blue" />
+                </div>
+                <h4 className="text-sm font-bold text-white leading-snug">{feat.label}</h4>
+                <p className="text-xs text-muted leading-relaxed">{feat.desc}</p>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* License badge + CTA */}
+        <div className="flex flex-col items-center gap-6 border-t border-white/5 pt-10 w-full">
+          <div className="flex items-center gap-4 flex-wrap justify-center">
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-white/80">
+              <Check className="w-3.5 h-3.5 text-neon-blue" /> Licença MIT — Código Aberto
+            </span>
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-white/80">
+              <Check className="w-3.5 h-3.5 text-neon-blue" /> Sem conta obrigatória
+            </span>
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-white/80">
+              <Check className="w-3.5 h-3.5 text-neon-blue" /> Sem mensalidade
+            </span>
+          </div>
+          <a
+            href="#download"
+            className="px-8 py-4 text-xs font-bold uppercase tracking-wider text-black bg-white hover:bg-white/90 transition-all duration-300 flex items-center gap-2 group"
+          >
+            Baixar Grátis (Completo)
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+          </a>
         </div>
 
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Video, Sparkles, MessageCircle, Laptop, Cpu, ShieldCheck } from "lucide-react";
+import { Video, MessageCircle, Laptop, EyeOff, Shield, Globe, Zap, FileText, Mic, Lock } from "lucide-react";
 
 export default function Marquee() {
   const platforms = [
@@ -13,25 +13,23 @@ export default function Marquee() {
     { name: "Skype Business", icon: Video },
   ];
 
-  const technologies = [
-    { name: "Ollama Local", icon: Cpu },
-    { name: "Whisper Speech", icon: Cpu },
-    { name: "DeepSeek R1", icon: Sparkles },
-    { name: "Llama 3.3", icon: Sparkles },
-    { name: "OpenAI GPT-4o", icon: Sparkles },
-    { name: "Gemini 2.0 Flash", icon: Sparkles },
-    { name: "SQLite Database", icon: ShieldCheck },
+  const benefits = [
+    { name: "Modo Stealth", icon: EyeOff },
+    { name: "100% Privado", icon: Shield },
+    { name: "Sem Mensalidade", icon: Zap },
+    { name: "Tradução ao Vivo", icon: Globe },
+    { name: "Transcrição Instantânea", icon: Mic },
+    { name: "Resumos Automáticos", icon: FileText },
+    { name: "Zero Telemetria", icon: Lock },
   ];
 
-  // Triplicating lists to ensure seamless looping transition
   const firstRow = [...platforms, ...platforms, ...platforms];
-  const secondRow = [...technologies, ...technologies, ...technologies];
+  const secondRow = [...benefits, ...benefits, ...benefits];
 
   return (
     <section className="bg-black py-20 w-full overflow-hidden flex flex-col gap-8 border-t border-white/5">
       {/* Row 1: Platforms (Scrolls Left) */}
       <div className="relative w-full flex items-center">
-        {/* Left and Right vignettes to mask edges smoothly */}
         <div className="absolute left-0 top-0 bottom-0 w-24 md:w-48 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none"></div>
         <div className="absolute right-0 top-0 bottom-0 w-24 md:w-48 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none"></div>
 
@@ -53,7 +51,7 @@ export default function Marquee() {
         </div>
       </div>
 
-      {/* Row 2: Models & Engines (Scrolls Right) */}
+      {/* Row 2: Benefits (Scrolls Right) */}
       <div className="relative w-full flex items-center">
         <div className="absolute left-0 top-0 bottom-0 w-24 md:w-48 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none"></div>
         <div className="absolute right-0 top-0 bottom-0 w-24 md:w-48 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none"></div>

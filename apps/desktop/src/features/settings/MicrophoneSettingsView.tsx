@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import * as api from "../../lib/tauriClient";
 import { unwrap } from "../../lib/tauriClient";
 import { isTauriRuntime, useTauriListen } from "../../lib/tauriEvents";
-import { useMacNativeSpeech } from "../../hooks/useMacNativeSpeech";
 import type { MicrophoneDeviceDto, MicTestStatusDto } from "../../lib/types";
 
 /** Sentinel value for the "OS default device" option in the <select>. */
@@ -19,24 +18,6 @@ export function MicrophoneSettingsView() {
   const [testing, setTesting] = useState(false);
   const [testLevel, setTestLevel] = useState(0);
   const [peaked, setPeaked] = useState(false);
-
-  const nativeSpeech = useMacNativeSpeech();
-  const [nativeSpeechSaving, setNativeSpeechSaving] = useState(false);
-
-  const toggleNativeSpeech = useCallback(
-    async (next: boolean) => {
-      setNativeSpeechSaving(true);
-      setError(null);
-      try {
-        await nativeSpeech.setEnabled(next);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : String(e));
-      } finally {
-        setNativeSpeechSaving(false);
-      }
-    },
-    [nativeSpeech],
-  );
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -261,31 +242,6 @@ export function MicrophoneSettingsView() {
               Preferência salva.
             </p>
           )}
-        </div>
-      )}
-
-      {nativeSpeech.supported && (
-        <div className="card" style={{ display: "grid", gap: 10 }} data-testid="native-speech-card">
-          <label style={{ display: "flex", gap: 10, alignItems: "flex-start", cursor: "pointer" }}>
-            <input
-              type="checkbox"
-              data-testid="native-speech-toggle"
-              checked={nativeSpeech.enabled}
-              disabled={nativeSpeechSaving || !nativeSpeech.loaded}
-              onChange={(e) => void toggleNativeSpeech(e.target.checked)}
-              style={{ marginTop: 3 }}
-            />
-            <span style={{ display: "grid", gap: 4 }}>
-              <strong>Reconhecimento de fala nativo do macOS (offline)</strong>
-              <span className="card-muted" style={{ fontSize: "0.8125rem" }}>
-                Transcreve no dispositivo, sem provedor na nuvem nem chave de API.
-                Útil porque o reconhecimento de voz do navegador não funciona no
-                macOS. Como o reconhecedor da Apple não detecta o idioma sozinho,
-                ele usa o idioma escolhido na transcrição (ou o do sistema, no
-                modo "auto"). Qualidade pode ficar abaixo do Whisper na nuvem.
-              </span>
-            </span>
-          </label>
         </div>
       )}
 

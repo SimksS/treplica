@@ -13,7 +13,7 @@ use crate::health::{
 use crate::prompts::{self, parse_suggestion_type_hint};
 use crate::transcription::{
     is_whisper_hallucination, normalize_detected_language, translation_system_prompt,
-    NO_SPEECH_MARKER,
+    translation_user_message, NO_SPEECH_MARKER,
 };
 use crate::vision::{build_vision_user_prompt, parse_image_data_url, VISION_SYSTEM_PROMPT};
 use crate::{
@@ -847,12 +847,7 @@ impl ProviderAdapter for OpenAiCompatibleAdapter {
             &request.source_language,
             &request.target_language,
         );
-        let user = match &request.context_hints {
-            Some(hints) if !hints.trim().is_empty() => {
-                format!("Session context:\n{hints}\n\nTranslate:\n{}", request.text)
-            }
-            _ => request.text.clone(),
-        };
+        let user = translation_user_message(&request.text, request.context_hints.as_deref());
 
         let is_uncertain = request.text.len() < 3 || request.text.contains("???");
         let translated = self.chat_completion(&system, &user).await?;

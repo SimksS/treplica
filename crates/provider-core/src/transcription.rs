@@ -91,13 +91,30 @@ pub fn language_label_for_prompt(code: &str) -> String {
     }
 }
 
+/// Builds the user-turn message for a translation request.
+/// If context hints are present, they help the model adapt register and terminology.
+pub fn translation_user_message(text: &str, context_hints: Option<&str>) -> String {
+    match context_hints {
+        Some(hints) if !hints.trim().is_empty() => {
+            format!(
+                "Context (use this to adapt register and terminology, do not translate it):\n{hints}\n\nText to translate:\n{text}"
+            )
+        }
+        _ => text.to_string(),
+    }
+}
+
 /// System prompt for chat-based translation (not Whisper).
 pub fn translation_system_prompt(source_language: &str, target_language: &str) -> String {
     let src = language_label_for_prompt(source_language);
     let tgt = language_label_for_prompt(target_language);
     format!(
-        "You are a professional translator. Translate the user's message from {src} to {tgt}. \
-         Output only the translation in {tgt}, without quotes, brackets, or explanations."
+        "You are a professional human interpreter fluent in both {src} and {tgt}. \
+         Your task is to convey the full meaning of the speaker's words in natural, idiomatic {tgt} — \
+         the way a native speaker would actually say it. \
+         Do NOT translate word-for-word; instead, preserve the intent, tone, register, and cultural nuance of the original. \
+         Idiomatic expressions, slang, and figures of speech must be rendered with their equivalent in {tgt}, not a literal rendering. \
+         Output only the final translation in {tgt}, with no explanations, brackets, quotes, or alternatives."
     )
 }
 

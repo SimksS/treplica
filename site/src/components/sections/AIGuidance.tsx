@@ -78,7 +78,7 @@ export default function AIGuidance() {
     <section
       id="ia"
       ref={containerRef}
-      className="relative min-h-screen w-full flex flex-col justify-center py-24 bg-black overflow-hidden border-t border-white/5"
+      className="relative w-full flex flex-col justify-center py-16 md:py-24 bg-black overflow-hidden border-t border-white/5"
     >
       {/* Background gradients */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-neon-purple/5 rounded-full blur-[140px] pointer-events-none"></div>
@@ -96,17 +96,18 @@ export default function AIGuidance() {
         {/* Full Width Graphic Mockup */}
         <div
           ref={imageWrapperRef}
-          className="relative w-full max-w-5xl rounded-2xl p-[1px] bg-gradient-to-b from-white/10 to-transparent shadow-[0_30px_60px_rgba(157,78,221,0.1)] mb-20 group overflow-hidden"
+          className="relative w-full max-w-4xl rounded-2xl p-[1px] bg-gradient-to-b from-white/10 to-transparent shadow-[0_30px_60px_rgba(157,78,221,0.1)] mb-20 group overflow-hidden"
         >
-          <div className="relative aspect-[21/9] bg-zinc-950 rounded-[15px] overflow-hidden">
+          <div className="relative aspect-[4/3] bg-zinc-950 rounded-[15px] overflow-hidden">
             <Image
               src="/images/ai-guidance.png"
-              alt="AI Copilot suggestion dashboard"
+              alt="Painel de orientação de IA durante reunião"
               fill
-              className="object-cover object-center opacity-90 group-hover:scale-[1.01] transition-transform duration-[2s] ease-out"
+              quality={100}
+              className="object-contain object-center opacity-95 group-hover:scale-[1.01] transition-transform duration-[2s] ease-out"
             />
             {/* Dark vignette */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 pointer-events-none"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
           </div>
         </div>
 
@@ -149,11 +150,11 @@ export default function AIGuidance() {
               <FileSpreadsheet className="w-5 h-5 text-white" />
             </div>
             <span className="text-xs font-semibold uppercase tracking-widest text-white">
-              Histórico SQLite
+              Histórico Local
             </span>
             <h4 className="text-lg font-bold text-white leading-tight">Logs & Exportações</h4>
             <p className="text-sm text-muted leading-relaxed">
-              Todas as discussões são salvas em um banco de dados SQLite local e privado. Exporte resumos, follow-ups e transcrições completas em Markdown com um clique.
+              Todas as sessões são salvas localmente, de forma privada. Exporte resumos, follow-ups e transcrições completas com um clique.
             </p>
           </div>
 
@@ -163,11 +164,11 @@ export default function AIGuidance() {
               <Eye className="w-5 h-5 text-neon-blue" />
             </div>
             <span className="text-xs font-semibold uppercase tracking-widest text-neon-blue">
-              Análise de Tela
+              Contexto Visual
             </span>
-            <h4 className="text-lg font-bold text-white leading-tight">Visão Computacional</h4>
+            <h4 className="text-lg font-bold text-white leading-tight">Análise de Slides</h4>
             <p className="text-sm text-muted leading-relaxed">
-              Adicione contexto visual à sua IA analisando capturas de tela ou compartilhamentos para entender slides e diagramas exibidos na reunião.
+              Mostre slides ou diagramas compartilhados na reunião para que o assistente entenda o contexto visual e gere sugestões mais precisas.
             </p>
           </div>
         </div>

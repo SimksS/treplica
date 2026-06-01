@@ -66,11 +66,6 @@ pub struct AppSettingsFile {
     /// Preferred microphone input device (cpal device name). `None` = OS default.
     #[serde(default)]
     pub preferred_microphone: Option<String>,
-    /// macOS only: use the native on-device speech recognizer (SFSpeechRecognizer)
-    /// instead of a cloud STT provider. Opt-in fallback for transcribing without
-    /// an API key; ignored on other platforms.
-    #[serde(default)]
-    pub macos_native_speech: bool,
     /// Default assistant / system prompt — persists across sessions.
     #[serde(default)]
     pub assistant: AssistantPreferences,
@@ -95,7 +90,6 @@ impl Default for AppSettingsFile {
             model_routing: ModelRoutingConfig::default(),
             default_snapshot_monitor_id: None,
             preferred_microphone: None,
-            macos_native_speech: false,
             assistant: AssistantPreferences::default(),
             documents_export_dir: None,
             accessibility: AccessibilitySettings::default(),

@@ -15,9 +15,6 @@ path = "src/main.rs"
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
-# Compiles the macOS Objective-C speech bridge (native/treplica_speech.m).
-# Pulled on all hosts (tiny), but only invoked when targeting macOS in build.rs.
-cc = "1"
 
 [dependencies]
 tauri = { version = "2", features = [] }

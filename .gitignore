@@ -40,3 +40,7 @@ test-results/
 apps/desktop/updater/*.key
 apps/desktop/updater-keys/
 **/credential-vault/.vault-master
+
+
+# claude
+.claude

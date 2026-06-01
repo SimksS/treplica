@@ -192,42 +192,6 @@ pub fn update_accessibility_settings(
     }
 }
 
-/// Whether this platform offers native on-device speech recognition
-/// (SFSpeechRecognizer). True only on macOS with the framework available.
-#[tauri::command]
-pub fn native_speech_supported() -> bool {
-    #[cfg(target_os = "macos")]
-    {
-        crate::audio::macos_speech::native_speech_supported()
-    }
-    #[cfg(not(target_os = "macos"))]
-    {
-        false
-    }
-}
-
-/// Current value of the macOS native-speech opt-in setting.
-#[tauri::command]
-pub fn get_macos_native_speech(state: State<'_, AppState>) -> Result<CommandResponse<bool>, ()> {
-    match state.app_settings.get() {
-        Ok(s) => Ok(CommandResponse::success(s.macos_native_speech)),
-        Err(e) => Ok(CommandResponse::failure("settings_error", e)),
-    }
-}
-
-/// Enable/disable native macOS speech recognition (opt-in fallback). Takes
-/// effect on the next transcribed chunk; no capture restart needed.
-#[tauri::command]
-pub fn set_macos_native_speech(
-    state: State<'_, AppState>,
-    enabled: bool,
-) -> Result<CommandResponse<bool>, ()> {
-    match state.app_settings.update(|s| s.macos_native_speech = enabled) {
-        Ok(s) => Ok(CommandResponse::success(s.macos_native_speech)),
-        Err(e) => Ok(CommandResponse::failure("settings_error", e)),
-    }
-}
-
 fn privacy_mode_to_string(mode: PrivacyMode) -> String {
     match mode {
         PrivacyMode::LocalOnly => "local_only".into(),

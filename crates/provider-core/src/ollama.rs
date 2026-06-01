@@ -624,12 +624,7 @@ impl ProviderAdapter for OllamaAdapter {
             &request.source_language,
             &request.target_language,
         );
-        let user = match &request.context_hints {
-            Some(hints) if !hints.trim().is_empty() => {
-                format!("Session context:\n{hints}\n\nTranslate:\n{}", request.text)
-            }
-            _ => request.text.clone(),
-        };
+        let user = crate::transcription::translation_user_message(&request.text, request.context_hints.as_deref());
 
         let is_uncertain = request.text.len() < 3 || request.text.contains("???");
         let translated = self.chat_completion(&system, &user).await?;

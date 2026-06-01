@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Laptop, Video, Cpu, Cloud, Database, ArrowUpRight } from "lucide-react";
+import { Laptop, Video, Sparkles, Layers, Shield, ArrowUpRight } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -14,33 +14,33 @@ export default function Compatibility() {
   const blocks = [
     {
       title: "Windows & macOS",
-      desc: "Suporte completo para sistemas desktop. Aceleração por hardware nativa CUDA (NVIDIA) e Metal (Apple Silicon).",
+      desc: "Suporte completo para desktop Windows 10/11 e macOS 12+. Instalação simples, sem configurações complexas.",
       icon: Laptop,
       link: "#download"
     },
     {
       title: "Zoom & Google Meet",
-      desc: "Escuta e transcreve qualquer chamada realizada por navegadores ou aplicações desktop dedicadas com roteamento virtual.",
+      desc: "Funciona com qualquer plataforma de videochamada — Zoom, Meet, Teams, Discord e muito mais.",
       icon: Video,
       link: "#transcricao"
     },
     {
-      title: "Ollama & LLMs Locais",
-      desc: "Integre de forma direta com o Ollama para rodar modelos Llama, Mistral ou DeepSeek 100% offline na sua própria GPU.",
-      icon: Cpu,
+      title: "Assistente de IA Integrado",
+      desc: "Escolha entre IA rodando totalmente offline na sua máquina ou conecte-se a provedores na nuvem com um clique.",
+      icon: Sparkles,
       link: "#ia"
     },
     {
-      title: "APIs de Alta Velocidade",
-      desc: "Se preferir, conecte APIs como Groq, OpenAI, Gemini ou OpenRouter para obter respostas em milissegundos a baixo custo.",
-      icon: Cloud,
-      link: "#como-funciona"
+      title: "Múltiplos Idiomas",
+      desc: "Transcrição e tradução em português, inglês, espanhol, francês, alemão, italiano, japonês, chinês e outros.",
+      icon: Layers,
+      link: "#traducao"
     },
     {
-      title: "SQLite Engine",
-      desc: "Histórico persistente e relatórios estruturados salvos inteiramente em um banco de dados leve local.",
-      icon: Database,
-      link: "#overlay"
+      title: "Privacidade Total",
+      desc: "Histórico de reuniões, transcrições e resumos salvos exclusivamente no seu computador. Seus dados, sua posse.",
+      icon: Shield,
+      link: "#como-funciona"
     }
   ];
 
@@ -78,14 +78,14 @@ export default function Compatibility() {
         {/* Heading */}
         <div className="max-w-3xl mb-20">
           <span className="text-xs font-semibold uppercase tracking-[0.25em] text-neon-blue mb-3 block">
-            INTEGRAÇÃO TOTAL
+            FUNCIONA ONDE VOCÊ JÁ TRABALHA
           </span>
           <h2 className="font-display text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-6">
-            Arquitetura Aberta <br />
-            <span className="text-gradient-electric italic font-light">E compatível.</span>
+            Compatível com <br />
+            <span className="text-gradient-electric italic font-light">Suas ferramentas.</span>
           </h2>
           <p className="text-muted text-base md:text-lg leading-relaxed font-light">
-            O Treplica conecta-se perfeitamente às ferramentas que você já usa no dia a dia, tanto de comunicação quanto de inteligência artificial.
+            O Treplica se integra perfeitamente às ferramentas de comunicação que você já usa no dia a dia, sem mudar seu fluxo de trabalho.
           </p>
         </div>
 

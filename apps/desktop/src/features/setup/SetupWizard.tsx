@@ -39,6 +39,12 @@ export function SetupWizard({ onComplete }: Props) {
     { kind: "success" | "error"; message: string } | null
   >(null);
   const [testModalOpen, setTestModalOpen] = useState(false);
+  // Whether a cloud transcription provider is configured. Re-checked when the
+  // user reaches the test step (they may have just added one in the providers
+  // step). `null` = not loaded yet.
+  const [transcriptionAvailable, setTranscriptionAvailable] = useState<
+    boolean | null
+  >(null);
 
   useEffect(() => {
     prefetchRuntimePlatform();
@@ -103,6 +109,27 @@ export function SetupWizard({ onComplete }: Props) {
     setError(null);
     setTestToast(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only when leaving the test step
+  }, [step]);
+
+  // On reaching the test step, check whether a cloud transcription provider is
+  // configured. On macOS, without one, transcription is unavailable (the
+  // browser Web Speech fallback doesn't work there).
+  useEffect(() => {
+    if (step !== 5) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await api.getTranscriptionAvailability();
+        if (!cancelled) {
+          setTranscriptionAvailable(res.ok ? Boolean(res.data?.cloud_available) : false);
+        }
+      } catch {
+        if (!cancelled) setTranscriptionAvailable(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [step]);
 
   const hotkey = state?.send_transcript_hotkey ?? "Ctrl+Shift+O";
@@ -325,29 +352,29 @@ export function SetupWizard({ onComplete }: Props) {
                 No teste, use <kbd>{sendLabel}</kbd> ou <kbd>{recordLabel}</kbd> para
                 gravar e enviar ({platform.displayName}).
               </p>
-              {platform.os === "macos" ? (
+              {platform.os === "macos" && transcriptionAvailable === false && (
                 <div
                   className="setup-session-note"
-                  data-testid="setup-macos-stt-note"
+                  data-testid="setup-macos-no-provider-note"
+                  role="alert"
                   style={{ marginTop: "var(--space-md)" }}
                 >
-                  <strong>Transcrição no macOS</strong>
+                  <strong>A transcrição pode não estar disponível neste dispositivo</strong>
                   <span>
-                    O reconhecimento de voz do navegador (Web Speech) não funciona
-                    no macOS — é uma limitação do WebView do sistema. Por isso, a
-                    transcrição do microfone e do áudio do sistema usa um provedor
-                    de IA na nuvem (Whisper via Groq ou OpenAI). Configure um na
-                    etapa anterior, "Conecte seus provedores", para transcrever
-                    suas reuniões.
+                    Você ainda não configurou um provedor de transcrição. No
+                    macOS, o reconhecimento de voz do navegador não funciona
+                    (limitação do WebView do sistema), então a transcrição do
+                    microfone e do áudio do sistema depende de um provedor de IA
+                    na nuvem (Whisper via Groq ou OpenAI). Volte à etapa "Conecte
+                    seus provedores" para configurar um e habilitar a transcrição.
                   </span>
                 </div>
-              ) : (
-                !speechRecognitionSupported() && (
-                  <p className="setup-hint">
-                    Dica: execute com npm run tauri:dev para transcrição real no
-                    WebView2.
-                  </p>
-                )
+              )}
+              {platform.os !== "macos" && !speechRecognitionSupported() && (
+                <p className="setup-hint">
+                  Dica: execute com npm run tauri:dev para transcrição real no
+                  WebView2.
+                </p>
               )}
             </div>
           )}

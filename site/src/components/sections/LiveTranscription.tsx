@@ -18,7 +18,7 @@ export default function LiveTranscription() {
     "Olá, bom dia! Sejam todos muito bem-vindos à nossa demonstração técnica.",
     "O Treplica está capturando meu áudio local e o áudio da chamada do Zoom em tempo real.",
     "A latência é inferior a um segundo, garantindo que nenhuma informação importante seja perdida.",
-    "Todo o processamento é feito localmente, direto na GPU do computador, sem enviar nada para nuvem."
+    "Todo o processamento acontece localmente na sua máquina, sem enviar nada para a nuvem."
   ];
 
   // Live text typing simulation
@@ -110,7 +110,7 @@ export default function LiveTranscription() {
     <section
       id="transcricao"
       ref={containerRef}
-      className="relative min-h-screen w-full flex flex-col justify-center py-24 bg-black border-t border-white/5 overflow-hidden"
+      className="relative w-full flex flex-col justify-center py-16 md:py-24 bg-black border-t border-white/5 overflow-hidden"
     >
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-neon-blue/5 rounded-full blur-[160px] pointer-events-none"></div>
 
@@ -128,16 +128,16 @@ export default function LiveTranscription() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
           {/* Left Column: Stat Counter & Subfeatures */}
           <div className="flex flex-col gap-12">
-            <div ref={leftColRef} className="flex items-baseline gap-4">
-              <span className="font-display text-7xl md:text-9xl font-black text-white tracking-tight leading-none drop-shadow-[0_0_30px_rgba(0,229,255,0.2)]">
-                0ms
+            <div ref={leftColRef} className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4">
+              <span className="font-display text-6xl md:text-9xl font-black text-white tracking-tight leading-none drop-shadow-[0_0_30px_rgba(0,229,255,0.2)]">
+                0
               </span>
               <div className="flex flex-col">
                 <span className="text-xs font-semibold uppercase tracking-widest text-neon-blue">
-                  Delay de Áudio
+                  Bytes enviados para a nuvem
                 </span>
                 <span className="text-muted text-sm mt-1">
-                  Sem dependência de servidores de terceiros.
+                  Seu áudio nunca sai da sua máquina.
                 </span>
               </div>
             </div>
@@ -161,9 +161,9 @@ export default function LiveTranscription() {
                   <Volume2 className="w-5 h-5 text-neon-purple" />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <h3 className="text-base font-semibold text-white">Whisper Local Otimizado</h3>
+                  <h3 className="text-base font-semibold text-white">Alta Precisão de Palavras</h3>
                   <p className="text-sm text-muted leading-relaxed">
-                    Modelos Whisper compilados em Rust e acelerados por hardware (CUDA/Metal) garantem alta precisão de palavras e pontuação inteligente.
+                    Motor de transcrição de alto desempenho com pontuação inteligente e reconhecimento preciso de voz, mesmo em ambientes ruidosos.
                   </p>
                 </div>
               </div>
@@ -188,11 +188,11 @@ export default function LiveTranscription() {
             <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-6">
               <div className="flex items-center gap-3">
                 <AudioLines className="w-5 h-5 text-neon-blue animate-pulse" />
-                <span className="text-xs font-semibold uppercase tracking-wider text-white">
-                  Mapeamento de Reunião
+                <span className="text-xs font-semibold uppercase tracking-wider text-white whitespace-nowrap">
+                  Transcrição ao Vivo
                 </span>
               </div>
-              <span className="px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold uppercase tracking-wider">
+              <span className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-bold uppercase tracking-wide whitespace-nowrap flex-shrink-0">
                 Gravando Local
               </span>
             </div>
@@ -211,9 +211,10 @@ export default function LiveTranscription() {
             {/* Controls Bar inside simulation */}
             <div className="flex items-center justify-between border-t border-white/5 pt-4 mt-6 text-xs text-muted">
               <span>Palavras transcritas: {typedText.split(" ").filter(Boolean).length}</span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                Aceleração por GPU ativa
+              <span className="flex items-center gap-1.5 whitespace-nowrap">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <span className="hidden sm:inline">Processamento local ativo</span>
+                <span className="sm:hidden">Local ativo</span>
               </span>
             </div>
           </div>

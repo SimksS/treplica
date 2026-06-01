@@ -29,9 +29,9 @@ export default function Footer() {
               O assistente de reuniões local que transcreve, traduz e te orienta com IA. Rodando 100% privado na sua própria máquina.
             </p>
             <div className="flex items-center gap-2 mt-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/5 text-white/80 border border-white/10">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                v1.0.0 Stable
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                v0.1-beta
               </span>
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/5 text-white/80 border border-white/10">
                 Licença MIT
@@ -100,7 +100,7 @@ export default function Footer() {
               </li>
               <li>
                 <a href="#compatibilidade" className="flex items-center gap-2 hover:text-white transition-colors">
-                  <BookOpen className="w-4 h-4" /> Integração Ollama
+                  <BookOpen className="w-4 h-4" /> Compatibilidade
                 </a>
               </li>
               <li>
@@ -121,10 +121,10 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} Treplica. Desenvolvido para total privacidade. Código aberto sob licença MIT.
           </p>
           <div className="flex gap-6 text-xs text-muted/60">
-            <a href="#download" className="hover:text-white transition-colors">
+            <a href="/docs" className="hover:text-white transition-colors">
               Políticas de Privacidade
             </a>
-            <a href="#como-funciona" className="hover:text-white transition-colors">
+            <a href="/docs" className="hover:text-white transition-colors">
               Termos de Uso
             </a>
           </div>

@@ -398,6 +398,9 @@ pub fn register_stealth_shortcut(app: &AppHandle) -> Result<(), String> {
         .stealth_hotkey;
     let shortcut: Shortcut = hotkey.parse().map_err(|e| format!("invalid hotkey: {e}"))?;
 
+    // Unregister first to handle same-process double-registration (e.g. hot-reload).
+    let _ = app.global_shortcut().unregister(shortcut);
+
     let app_handle = app.clone();
     app.global_shortcut()
         .on_shortcut(shortcut, move |_app, _shortcut, event| {

@@ -93,7 +93,7 @@ jobs:
             - macOS 12+ (Apple Silicon ou Intel)
             - Linux x64 (Ubuntu 22.04+ ou equivalente)
             - 8 GB de RAM recomendado para IA local
-          releaseDraft: true
-          prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') || contains(github.ref_name, 'rc') }}
+          releaseDraft: false
+          prerelease: false
           projectPath: apps/desktop
           args: ${{ matrix.args }}

@@ -14,6 +14,10 @@ pub fn register_send_transcript_shortcut(app: &AppHandle) -> Result<(), String> 
         .send_transcript_hotkey;
 
     let shortcut: Shortcut = hotkey.parse().map_err(|e| format!("invalid send hotkey: {e}"))?;
+
+    // Unregister first to handle same-process double-registration (e.g. hot-reload).
+    let _ = app.global_shortcut().unregister(shortcut);
+
     let app_handle = app.clone();
 
     app.global_shortcut()

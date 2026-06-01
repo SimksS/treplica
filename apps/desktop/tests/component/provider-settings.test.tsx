@@ -196,7 +196,7 @@ describe("Provider settings UI", () => {
     await waitFor(() => {
       expect(api.testProviderConfig).toHaveBeenCalledWith("ollama-1");
       expect(screen.getByTestId("provider-test-toast-ollama-1")).toHaveTextContent(
-        "respondeu: OK",
+        "Tudo certo!",
       );
     });
   });

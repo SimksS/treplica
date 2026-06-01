@@ -37,7 +37,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDZCQTE4OTA1NTE5ODhDN0IKUldSN2pKaFJCWW1oYTNvbjAxaCtYK2FWdDJyUjN0Tm1hd09lQVZ0V2I4dmQzeDlBSkJid3I4WlQKCg==",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDVBMzQ0NjVBODg5RTVBMEMKUldRTVdwNklXa1kwV3JKTWQ3Q2VHb0sybUNWdnpLZmVBMnNrbjMrSTdOcUlDQVhZVTJGcy85ajYK",
       "endpoints": [
         "https://github.com/treplica/treplica/releases/latest/download/latest.json"
       ],

@@ -26,15 +26,19 @@ export interface DownloadUrls {
 
 export async function getLatestRelease(): Promise<ReleaseInfo | null> {
   try {
+    // /releases/latest ignora pre-releases e drafts.
+    // /releases?per_page=1 retorna a release mais recente publicada,
+    // incluindo pre-releases (beta, alpha, rc) — ignora apenas drafts.
     const res = await fetch(
-      `https://api.github.com/repos/${REPO}/releases/latest`,
+      `https://api.github.com/repos/${REPO}/releases?per_page=1`,
       {
         headers: { Accept: 'application/vnd.github+json' },
         next: { revalidate: 3600 },
       }
     );
     if (!res.ok) return null;
-    return res.json() as Promise<ReleaseInfo>;
+    const releases = await res.json() as ReleaseInfo[];
+    return releases[0] ?? null;
   } catch {
     return null;
   }

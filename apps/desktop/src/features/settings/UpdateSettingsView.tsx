@@ -1,14 +1,20 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { getVersion } from "@tauri-apps/api/app";
 import * as api from "../../lib/tauriClient";
 import { unwrap } from "../../lib/tauriClient";
 import type { UpdateCheckDto } from "../../lib/types";
 
 export function UpdateSettingsView() {
+  const [currentVersion, setCurrentVersion] = useState<string | null>(null);
   const [check, setCheck] = useState<UpdateCheckDto | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [installing, setInstalling] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    getVersion().then(setCurrentVersion).catch(() => {});
+  }, []);
 
   const runCheck = useCallback(async () => {
     setLoading(true);
@@ -80,18 +86,16 @@ export function UpdateSettingsView() {
         )}
       </div>
 
-      {check && (
-        <dl className="storage-settings-dl">
-          <dt>Versão atual</dt>
-          <dd>{check.current_version}</dd>
-          {check.latest_version && (
-            <>
-              <dt>Última versão</dt>
-              <dd>{check.latest_version}</dd>
-            </>
-          )}
-        </dl>
-      )}
+      <dl className="storage-settings-dl">
+        <dt>Versão atual</dt>
+        <dd>{currentVersion ?? check?.current_version ?? "—"}</dd>
+        {check?.latest_version && (
+          <>
+            <dt>Última versão disponível</dt>
+            <dd>{check.latest_version}</dd>
+          </>
+        )}
+      </dl>
       {check?.notes && (
         <div className="card-muted" style={{ marginTop: "1rem", whiteSpace: "pre-wrap" }}>
           {check.notes}

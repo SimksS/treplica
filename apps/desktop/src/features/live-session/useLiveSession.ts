@@ -3,7 +3,11 @@ import { listen } from "@tauri-apps/api/event";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import * as api from "../../lib/tauriClient";
-import { hasUpdateInput } from "../assistants/assistantContextUtils";
+import {
+  formToUpdateInput,
+  hasUpdateInput,
+  preferencesToForm,
+} from "../assistants/assistantContextUtils";
 
 import { unwrap } from "../../lib/tauriClient";
 
@@ -396,9 +400,22 @@ export function useLiveSession() {
         setSystemInterim("");
         setTranslationError(null);
         setAiPending(EMPTY_AI_PENDING);
+        // Resolve o contexto a aplicar: o input explícito (fluxo do modal, com contexto
+        // pré-reunião e anexos) tem prioridade; sem ele, recorremos às preferências do
+        // assistente salvas, para que um assistente configurado seja SEMPRE aplicado.
+        let contextToApply = initialContext;
+        if (!contextToApply || !hasUpdateInput(contextToApply)) {
+          try {
+            const prefs = unwrap(await api.getAssistantPreferences());
+            const fromPrefs = formToUpdateInput(preferencesToForm(prefs));
+            if (hasUpdateInput(fromPrefs)) contextToApply = fromPrefs;
+          } catch {
+            /* sem preferências salvas — inicia sem contexto */
+          }
+        }
         const live =
-          initialContext && hasUpdateInput(initialContext)
-            ? unwrap(await api.updateSessionContext(started.id, initialContext))
+          contextToApply && hasUpdateInput(contextToApply)
+            ? unwrap(await api.updateSessionContext(started.id, contextToApply))
             : unwrap(await api.getLiveSessionState(started.id));
         applyState(live);
       } catch (e) {

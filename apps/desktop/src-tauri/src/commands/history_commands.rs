@@ -407,6 +407,7 @@ pub fn delete_session(
         Err(e) => return Ok(CommandResponse::failure("deletion_error", e)),
     }
     state.live_listeners.stop(&session_id);
+    state.clear_guidance_memory(&session_id);
     if let Ok(mut sims) = state.simulators.lock() {
         sims.remove(&session_id);
     }

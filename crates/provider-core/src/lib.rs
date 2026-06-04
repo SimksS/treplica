@@ -91,6 +91,29 @@ pub enum SuggestionType {
     Fallback,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ChatRole {
+    User,
+    Assistant,
+}
+
+/// One turn of the per-session guidance conversation (memory).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ChatTurn {
+    pub role: ChatRole,
+    pub content: String,
+}
+
+impl ChatTurn {
+    pub fn user(content: impl Into<String>) -> Self {
+        Self { role: ChatRole::User, content: content.into() }
+    }
+    pub fn assistant(content: impl Into<String>) -> Self {
+        Self { role: ChatRole::Assistant, content: content.into() }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct GuidanceRequest {
     pub session_context: SessionContextInput,
@@ -100,6 +123,11 @@ pub struct GuidanceRequest {
     /// Page images (data URLs) from pre-meeting PDF/image attachments.
     #[serde(default)]
     pub context_image_data_urls: Vec<String>,
+    /// Per-session conversation history (memory). When non-empty, the adapter sends
+    /// `system + these turns` instead of a single stateless user prompt. The last
+    /// turn is the current user ask and carries any context images.
+    #[serde(default)]
+    pub conversation: Vec<ChatTurn>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

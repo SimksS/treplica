@@ -13,6 +13,34 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ---
 
+## [0.1.1-beta.2] — 2026-06-04
+
+Segunda versão beta. Foco na qualidade da orientação ao vivo: respostas mais enxutas, assistente que respeita o preset escolhido e memória de conversa durante a sessão.
+
+### Adicionado
+
+- **Memória de conversa por sessão:** a IA agora mantém o contexto da sessão e as orientações anteriores em memória enquanto a reunião dura, em vez de tratar cada pedido isoladamente. O contexto é fixado na primeira orientação e permanece presente até o fim. Ao encerrar a sessão, a conversa com a IA é descartada e a próxima sessão começa do zero.
+- **Versão atual na tela de Atualizações:** a versão instalada do Treplica é exibida diretamente, sem precisar verificar atualizações primeiro.
+
+### Alterado
+
+- **Assistente escolhido agora prevalece:** ao selecionar um preset (Vendas, Entrevista, Anotador, Geral) ou definir um prompt de sistema, ele passa a ser a instrução principal do modelo — antes era rebaixado a "instruções adicionais" e contradito por um formato fixo, fazendo todos os assistentes responderem de forma genérica.
+- **Respostas mais enxutas para leitura ao vivo:** a orientação passou a vir telegráfica (em geral ≤ 2 frases curtas), com um limite rígido de comprimento na geração, para ser absorvida de relance durante a conversa.
+- **Contexto e assistente sempre aplicados ao iniciar:** quando já havia uma sessão ativa, o contexto/assistente escolhido no modal era descartado; agora é sempre aplicado à sessão.
+
+### Corrigido
+
+- **Atalho de orientação (`Ctrl+Shift+O`) no overlay:** o atalho deixava de funcionar de forma intermitente no overlay porque a assinatura do evento era recriada a cada render; agora permanece estável enquanto a sessão está ativa.
+- **Updater e atalho no startup:** corrigido o endpoint do updater e o crash ao registrar um atalho global já registrado por um processo anterior.
+- **Testes:** atualização do Vitest para a série 4.x e correção do teste de provider.
+
+### Problemas Conhecidos
+
+- **Contexto pré-reunião (texto):** em alguns fluxos, o texto digitado no campo de contexto pode não estar chegando ao modelo. Correção em andamento — por ora, instruções inseridas ali podem ser ignoradas.
+- Os problemas conhecidos da `0.1.0-beta.1` (assinatura no macOS, transparência/exclusão de captura no Linux, desempenho de modelos grandes no Ollama) permanecem válidos.
+
+---
+
 ## [0.1.0-beta.1] — 2026-06-01
 
 Primeira versão pública do Treplica. Lançamento beta focado em estabilidade core e experiência local-first.
@@ -94,5 +122,6 @@ Primeira versão pública do Treplica. Lançamento beta focado em estabilidade c
 
 ---
 
-[Não publicado]: https://github.com/SimksS/treplica/compare/v0.1.0-beta.1...HEAD
+[Não publicado]: https://github.com/SimksS/treplica/compare/v0.1.1-beta.2...HEAD
+[0.1.1-beta.2]: https://github.com/SimksS/treplica/compare/v0.1.0-beta.1...v0.1.1-beta.2
 [0.1.0-beta.1]: https://github.com/SimksS/treplica/releases/tag/v0.1.0-beta.1

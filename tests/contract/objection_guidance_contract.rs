@@ -22,6 +22,7 @@ async fn objection_request_returns_structured_objection_response() {
             suggestion_type: Some(SuggestionType::ObjectionResponse),
             privacy_mode: PrivacyMode::LocalOnly,
             context_image_data_urls: vec![],
+            conversation: vec![],
         })
         .await
         .expect("guidance");
@@ -45,6 +46,7 @@ async fn follow_up_type_returns_actionable_question() {
             suggestion_type: Some(SuggestionType::FollowUpQuestion),
             privacy_mode: PrivacyMode::LocalOnly,
             context_image_data_urls: vec![],
+            conversation: vec![],
         })
         .await
         .expect("guidance");

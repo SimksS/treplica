@@ -14,7 +14,7 @@ export default function UpdatesDoc() {
       </div>
 
       <p className="text-lg text-muted">
-        O Treplica verifica e aplica atualizações de forma manual, com sua confirmação. Nenhuma atualização é instalada em segundo plano sem que você aprove.
+        O Treplica verifica e aplica atualizações de forma manual, com sua confirmação. Nenhuma atualização é instalada em segundo plano sem que você aprove. A <strong className="text-white">versão atual instalada</strong> é exibida diretamente em <strong className="text-white">Configurações → Atualizações</strong>, sem precisar verificar primeiro.
       </p>
 
       <div className="space-y-8 mt-4">

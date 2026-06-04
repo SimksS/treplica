@@ -143,6 +143,7 @@ pub async fn run_setup_ai_test(
         suggestion_type: None,
         privacy_mode,
         context_image_data_urls: vec![],
+        conversation: vec![],
     };
 
     match crate::providers::adapter::request_guidance(&resolved, request).await {

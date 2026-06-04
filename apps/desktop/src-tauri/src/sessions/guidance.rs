@@ -3,7 +3,7 @@ use local_store::models::{GuidanceSuggestion, ProviderCallRecord, SuggestionType
 use local_store::repositories::StoreRepositories;
 use provider_core::tasks::ModelTask;
 use provider_core::{
-    GuidanceRequest, GuidanceResponse, SessionContextInput, TranscriptSnippet,
+    ChatTurn, GuidanceRequest, GuidanceResponse, SessionContextInput, TranscriptSnippet,
 };
 use tauri::AppHandle;
 
@@ -100,6 +100,8 @@ impl GuidanceService {
                 suggestion_type: Some(classified.suggestion_type),
                 privacy_mode,
                 context_image_data_urls,
+                // Conversation memory is attached later in `attach_conversation`.
+                conversation: Vec::new(),
             },
             trigger_segment_ids,
             started_at: Utc::now(),
@@ -114,6 +116,41 @@ impl GuidanceService {
             .map_err(|e| e.to_string())
     }
 
+    /// Seeds the request with the session's conversation memory and appends the current
+    /// turn. On the FIRST request the full session context (incl. pre-meeting material)
+    /// is sent as the opening user message; later requests send only the recent
+    /// transcript and rely on the pinned context already in history.
+    /// Returns the conversation (including the current user turn) to be completed with
+    /// the assistant reply via [`Self::remember_response`].
+    fn attach_conversation(
+        state: &AppState,
+        session_id: &str,
+        prepared: &mut PreparedGuidance,
+    ) -> Vec<ChatTurn> {
+        let mut convo = state.guidance_memory_snapshot(session_id);
+        let current_user = if convo.is_empty() {
+            provider_core::prompts::build_user_prompt(&prepared.request)
+        } else {
+            provider_core::prompts::build_followup_user_prompt(&prepared.request)
+        };
+        convo.push(ChatTurn::user(current_user));
+        prepared.request.conversation = convo.clone();
+        convo
+    }
+
+    /// Stores the assistant reply into the session conversation memory, capping the
+    /// history (the pinned opening context turn is always kept).
+    fn remember_response(
+        state: &AppState,
+        session_id: &str,
+        mut convo: Vec<ChatTurn>,
+        response_text: &str,
+    ) {
+        convo.push(ChatTurn::assistant(response_text.to_string()));
+        cap_conversation(&mut convo);
+        state.set_guidance_memory(session_id, convo);
+    }
+
     pub async fn generate_contextual_for_session(
         state: &AppState,
         session_id: &str,
@@ -123,13 +160,15 @@ impl GuidanceService {
             return Err("orientação já em andamento; aguarde a resposta anterior".into());
         }
         let result = async {
-            let prepared = state.with_repo_str(|repo| {
+            let mut prepared = state.with_repo_str(|repo| {
                 Self::prepare_with_limit(state, repo, session_id, GUIDANCE_TRANSCRIPT_LIMIT)
             })?;
+            let convo = Self::attach_conversation(state, session_id, &mut prepared);
             let response = ai_activity::with_activity(app, session_id, "guidance", || {
                 Self::fetch_provider(&prepared)
             })
             .await?;
+            Self::remember_response(state, session_id, convo, &response.text);
             state.with_repo_str(|repo| Self::persist(repo, session_id, prepared, response))
         }
         .await;
@@ -147,11 +186,13 @@ impl GuidanceService {
             return Ok(None);
         }
         let result = async {
-            let prepared = state.with_repo_str(|repo| Self::prepare(state, repo, session_id))?;
+            let mut prepared = state.with_repo_str(|repo| Self::prepare(state, repo, session_id))?;
+            let convo = Self::attach_conversation(state, session_id, &mut prepared);
             let response = ai_activity::with_activity(app, session_id, "guidance", || {
                 Self::fetch_provider(&prepared)
             })
             .await?;
+            Self::remember_response(state, session_id, convo, &response.text);
             state.with_repo_str(|repo| Self::persist(repo, session_id, prepared, response))
         }
         .await;
@@ -247,6 +288,23 @@ impl GuidanceService {
 
 /// Trechos de transcrição enviados ao modelo ao pedir orientação (contexto conversacional).
 pub const GUIDANCE_TRANSCRIPT_LIMIT: usize = 30;
+
+/// Turnos de conversa (user+assistant) mantidos além da mensagem de contexto fixada.
+/// ~6 trocas — equilibra memória conversacional e o limite de janela de modelos locais.
+const MEMORY_RECENT_TURNS: usize = 12;
+
+/// Mantém a memória da sessão limitada: a primeira mensagem (contexto fixado) é sempre
+/// preservada; só os turnos mais recentes além dela são retidos.
+fn cap_conversation(convo: &mut Vec<ChatTurn>) {
+    if convo.len() <= MEMORY_RECENT_TURNS + 1 {
+        return;
+    }
+    let first = convo[0].clone();
+    let recent: Vec<ChatTurn> = convo[convo.len() - MEMORY_RECENT_TURNS..].to_vec();
+    convo.clear();
+    convo.push(first);
+    convo.extend(recent);
+}
 
 pub(crate) fn recent_transcript_context(
     repo: &StoreRepositories<'_>,

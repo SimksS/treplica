@@ -147,6 +147,7 @@ async fn run_task_probe(
                     suggestion_type: None,
                     privacy_mode: privacy,
                     context_image_data_urls: vec![],
+                    conversation: vec![],
                 },
             )
             .await

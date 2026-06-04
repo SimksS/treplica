@@ -65,6 +65,7 @@ async fn guidance_returns_structured_output_with_grounding() {
             suggestion_type: None,
             privacy_mode: PrivacyMode::LocalOnly,
             context_image_data_urls: vec![],
+            conversation: vec![],
         })
         .await
         .expect("guidance");

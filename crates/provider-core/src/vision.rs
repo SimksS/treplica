@@ -9,6 +9,23 @@ Sua tarefa:
 4. Responder no idioma dominante da transcrição ou em português se não houver transcrição.
 5. Não inventar detalhes ilegíveis na imagem; indique incerteza quando aplicável."#;
 
+/// Cabeçalho curto para análise de imagem quando um assistente está selecionado.
+const VISION_ASSISTANT_PREAMBLE: &str = r#"Você opera dentro do Treplica e está analisando uma imagem anexada (screenshot, slide, frame ou documento) no contexto da sessão. A mensagem inclui o contexto da sessão, materiais pré-reunião e a transcrição recente. Use o idioma dominante da transcrição e não invente detalhes ilegíveis na imagem. Siga integralmente as instruções abaixo — elas definem seu papel, comportamento e formato de resposta."#;
+
+/// System prompt da análise visual.
+///
+/// Com assistente selecionado, o prompt do preset é autoritativo (precedido de um
+/// cabeçalho de visão). Sem preset, usa o prompt de visão padrão.
+pub fn build_vision_system_prompt(custom: Option<&str>) -> String {
+    use crate::prompts::BREVITY_RULE;
+    match custom {
+        Some(s) if !s.trim().is_empty() => {
+            format!("{VISION_ASSISTANT_PREAMBLE}\n\n{}\n\n{BREVITY_RULE}", s.trim())
+        }
+        _ => format!("{VISION_SYSTEM_PROMPT}\n\n{BREVITY_RULE}"),
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct ParsedImage {
     pub mime: String,
@@ -97,13 +114,23 @@ pub fn build_vision_user_prompt(
         ));
     }
 
-    parts.push(
-        "Analise a imagem anexada e responda em texto corrido (4–12 frases), sem usar markdown (sem asteriscos, hifens de lista ou cabeçalhos):\n\
-         a) O que a imagem mostra;\n\
-         b) Como isso se relaciona com a conversa/transcrição, se houver;\n\
-         c) O que o usuário provavelmente quer entender ou fazer a seguir."
-            .into(),
-    );
+    if session_context
+        .system_prompt
+        .as_deref()
+        .map(|s| !s.trim().is_empty())
+        .unwrap_or(false)
+    {
+        // Assistente selecionado: ele define o formato. Apenas garantimos que a imagem seja considerada.
+        parts.push(
+            "TAREFA: analise a imagem integrando-a ao contexto da sessão, aos materiais pré-reunião e à transcrição acima, e responda seguindo as instruções do seu sistema. Cumpra a REGRA DE BREVIDADE: o mínimo de palavras, leitura de relance. Não invente detalhes ilegíveis na imagem."
+                .into(),
+        );
+    } else {
+        parts.push(
+            "TAREFA (leitura ao vivo, seja telegráfico): em 1–3 frases curtas, diga só o essencial — o que a imagem mostra e o que o usuário deve entender ou fazer agora, conectando à conversa se houver. Use o mínimo de palavras. Sem markdown, sem introdução. Não invente detalhes ilegíveis."
+                .into(),
+        );
+    }
     parts.join("\n\n")
 }
 

@@ -18,6 +18,7 @@ async fn low_confidence_produces_fallback() {
             suggestion_type: None,
             privacy_mode: PrivacyMode::LocalOnly,
             context_image_data_urls: vec![],
+            conversation: vec![],
         })
         .await
         .expect("response");
@@ -39,6 +40,7 @@ async fn objection_snippet_grounds_objection_response() {
             suggestion_type: None,
             privacy_mode: PrivacyMode::LocalOnly,
             context_image_data_urls: vec![],
+            conversation: vec![],
         })
         .await
         .expect("response");

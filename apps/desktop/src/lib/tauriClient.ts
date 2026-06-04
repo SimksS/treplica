@@ -617,6 +617,10 @@ export async function nativeSystemAudioSupported(): Promise<boolean> {
   return invoke<boolean>("native_system_audio_supported");
 }
 
+export function quitApp(): void {
+  void invoke("quit_app");
+}
+
 export interface NativeSystemAudioStatusDto {
   active: boolean;
   audio_level: number;

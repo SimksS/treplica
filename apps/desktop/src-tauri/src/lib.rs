@@ -10,6 +10,8 @@ mod storage;
 
 use local_store::provider_repository::ProviderRepository;
 use tauri::{Emitter, Manager, WindowEvent};
+use tauri::menu::{MenuBuilder, MenuItemBuilder};
+use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 
 use commands::session_commands::active_session_requires_leave_prompt;
 
@@ -51,7 +53,6 @@ pub fn run() {
             }
             if let Some(main_win) = app.get_webview_window("main") {
                 let app_handle = app.handle().clone();
-                let main_clone = main_win.clone();
                 main_win.on_window_event(move |event| {
                     if let WindowEvent::CloseRequested { api, .. } = event {
                         api.prevent_close();
@@ -64,17 +65,7 @@ pub fn run() {
                         if needs_prompt {
                             let _ = app_handle.emit_to("main", "main-close-requested", ());
                         } else {
-                            let _ = main_clone.hide();
-                            if let Some(state) = app_handle.try_state::<AppState>() {
-                                commands::audio_capture_commands::stop_native_system_audio_internal(
-                                    &state, None,
-                                );
-                                commands::audio_capture_commands::stop_native_microphone_internal(
-                                    &state, None,
-                                );
-                                let _ = state.audio_capture.release_mode("microphone", "main");
-                                let _ = state.audio_capture.release_mode("system", "main");
-                            }
+                            let _ = app_handle.emit_to("main", "main-quit-requested", ());
                         }
                     }
                 });
@@ -104,6 +95,39 @@ pub fn run() {
                     }
                 });
             }
+            let show_item = MenuItemBuilder::with_id("show", "Abrir Treplica").build(app)?;
+            let quit_item = MenuItemBuilder::with_id("quit", "Sair").build(app)?;
+            let tray_menu = MenuBuilder::new(app)
+                .items(&[&show_item, &quit_item])
+                .build()?;
+            let _tray = TrayIconBuilder::new()
+                .icon(app.default_window_icon().unwrap().clone())
+                .menu(&tray_menu)
+                .tooltip("Treplica")
+                .on_menu_event(|app, event| match event.id.as_ref() {
+                    "show" => {
+                        if let Some(win) = app.get_webview_window("main") {
+                            let _ = win.show();
+                            let _ = win.set_focus();
+                        }
+                    }
+                    "quit" => app.exit(0),
+                    _ => {}
+                })
+                .on_tray_icon_event(|tray, event| {
+                    if let TrayIconEvent::Click { button, button_state, .. } = event {
+                        if matches!(button, MouseButton::Left)
+                            && matches!(button_state, MouseButtonState::Up)
+                        {
+                            let app = tray.app_handle();
+                            if let Some(win) = app.get_webview_window("main") {
+                                let _ = win.show();
+                                let _ = win.set_focus();
+                            }
+                        }
+                    }
+                })
+                .build(app)?;
             register_all(app.handle())?;
             Ok(())
         })
@@ -172,6 +196,7 @@ pub fn run() {
             commands::setup_commands::update_onboarding_state,
             commands::setup_commands::complete_onboarding,
             commands::platform_commands::get_runtime_platform,
+            commands::platform_commands::quit_app,
             commands::setup_commands::run_setup_ai_test,
             commands::update_commands::check_for_app_update,
             commands::update_commands::install_app_update,

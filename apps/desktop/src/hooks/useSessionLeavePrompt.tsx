@@ -3,6 +3,7 @@ import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { EndSessionConfirmModal } from "../components/EndSessionConfirmModal";
+import { QuitConfirmModal } from "../components/QuitConfirmModal";
 import type { useLiveSession } from "../features/live-session/useLiveSession";
 import { isActiveLiveSession } from "../features/live-session/liveSessionUtils";
 import * as api from "../lib/tauriClient";
@@ -101,6 +102,46 @@ export function useSessionLeavePrompt(live: LiveSession) {
   );
 
   return { requestLeave, needsPrompt, modal };
+}
+
+/** Exibe modal de confirmação quando o usuário fecha a janela sem sessão ativa. */
+export function useQuitListener() {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const label = getCurrentWebviewWindow().label;
+    if (label !== "main") return;
+
+    const unlisten = listen("main-quit-requested", () => {
+      setOpen(true);
+    });
+    return () => {
+      void unlisten.then((fn) => fn());
+    };
+  }, []);
+
+  const handleQuit = useCallback(() => {
+    setOpen(false);
+    api.quitApp();
+  }, []);
+
+  const handleMinimize = useCallback(async () => {
+    setOpen(false);
+    const win = getCurrentWebviewWindow();
+    await win.hide();
+    await api.releaseAllAudioCapture("main");
+  }, []);
+
+  const modal = (
+    <QuitConfirmModal
+      open={open}
+      onQuit={handleQuit}
+      onMinimize={() => void handleMinimize()}
+      onCancel={() => setOpen(false)}
+    />
+  );
+
+  return { modal };
 }
 
 /** Reidrata sessão ativa do backend e escuta pedidos de fechamento (main / overlay). */

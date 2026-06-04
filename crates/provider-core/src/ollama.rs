@@ -8,12 +8,12 @@ use serde_json::json;
 
 use crate::health::{validate_health_reply, HEALTH_CHECK_SYSTEM, HEALTH_CHECK_USER};
 use crate::prompts::{self, parse_suggestion_type_hint};
-use crate::vision::{build_vision_user_prompt, parse_image_data_url, VISION_SYSTEM_PROMPT};
+use crate::vision::{build_vision_system_prompt, build_vision_user_prompt, parse_image_data_url};
 use crate::{
-    DocumentGenerationRequest, DocumentGenerationResponse, GuidanceRequest, GuidanceResponse,
-    ProviderAdapter, ProviderCapability, ProviderError, ProviderErrorCode, ProviderKind,
-    ProviderMetadata, ProviderResult, SuggestionType, TranslationRequest, TranslationResponse,
-    VisionRequest, VisionResponse,
+    ChatRole, DocumentGenerationRequest, DocumentGenerationResponse, GuidanceRequest,
+    GuidanceResponse, ProviderAdapter, ProviderCapability, ProviderError, ProviderErrorCode,
+    ProviderKind, ProviderMetadata, ProviderResult, SuggestionType, TranslationRequest,
+    TranslationResponse, VisionRequest, VisionResponse,
 };
 
 const DEFAULT_BASE_URL: &str = "http://127.0.0.1:11434";
@@ -321,15 +321,43 @@ impl OllamaAdapter {
         parse_ollama_chat_body(&raw, &resolved_model)
     }
 
+    /// Posts a pre-built `messages` array (system + conversation history) and parses the reply.
+    async fn complete_messages(
+        &self,
+        messages: Vec<serde_json::Value>,
+    ) -> ProviderResult<String> {
+        let resolved_model = resolve_model_tag(&self.base_url, &self.model).await;
+        let url = format!("{}/api/chat", self.base_url.trim_end_matches('/'));
+        let body = json!({
+            "model": resolved_model,
+            "stream": false,
+            "options": {"num_predict": prompts::GUIDANCE_MAX_TOKENS},
+            "messages": messages,
+        });
+        let resp = shared_http_client()
+            .post(&url)
+            .json(&body)
+            .send()
+            .await
+            .map_err(map_network)?;
+        if !resp.status().is_success() {
+            let status = resp.status();
+            let detail = resp.text().await.unwrap_or_default();
+            return Err(ProviderError::structured(
+                ProviderErrorCode::ProviderUnavailable,
+                format!("ollama chat HTTP {status}: {detail}"),
+            ));
+        }
+        let raw = resp.text().await.map_err(map_network)?;
+        parse_ollama_chat_body(&raw, &resolved_model)
+    }
+
     pub async fn analyze_image(&self, request: VisionRequest) -> ProviderResult<VisionResponse> {
         self.validate_privacy(request.privacy_mode)?;
         let started = Utc::now();
         let parsed = parse_image_data_url(&request.image_data_url)?;
         let resolved_model = resolve_model_tag(&self.base_url, &self.model).await;
-        let system = match request.session_context.system_prompt.as_deref() {
-            Some(s) if !s.trim().is_empty() => format!("{VISION_SYSTEM_PROMPT}\n\n{s}"),
-            _ => VISION_SYSTEM_PROMPT.to_string(),
-        };
+        let system = build_vision_system_prompt(request.session_context.system_prompt.as_deref());
         let user = build_vision_user_prompt(
             &request.session_context,
             &request.recent_transcript,
@@ -450,48 +478,51 @@ fn map_network(err: reqwest::Error) -> ProviderError {
     )
 }
 
-impl OllamaAdapter {
-    async fn chat_completion_with_images(
-        &self,
-        system: &str,
-        user: &str,
-        image_data_urls: &[String],
-    ) -> ProviderResult<String> {
-        if image_data_urls.is_empty() {
-            return self.chat_completion(system, user).await;
-        }
-        let resolved_model = resolve_model_tag(&self.base_url, &self.model).await;
-        let images: Result<Vec<String>, ProviderError> = image_data_urls
-            .iter()
-            .map(|url| parse_image_data_url(url).map(|p| p.base64_payload))
-            .collect();
-        let images = images?;
-        let url = format!("{}/api/chat", self.base_url.trim_end_matches('/'));
-        let body = json!({
-            "model": resolved_model,
-            "stream": false,
-            "messages": [
-                {"role": "system", "content": system},
-                {"role": "user", "content": user, "images": images},
-            ],
-        });
-        let resp = shared_http_client()
-            .post(&url)
-            .json(&body)
-            .send()
-            .await
-            .map_err(map_network)?;
-        if !resp.status().is_success() {
-            let status = resp.status();
-            let detail = resp.text().await.unwrap_or_default();
-            return Err(ProviderError::structured(
-                ProviderErrorCode::ProviderUnavailable,
-                format!("ollama vision chat HTTP {status}: {detail}"),
-            ));
-        }
-        let raw = resp.text().await.map_err(map_network)?;
-        parse_ollama_chat_body(&raw, &resolved_model)
+/// Builds the Ollama chat `messages` array for a guidance request: a system message
+/// followed by the per-session conversation (memory). Context images are attached to
+/// the current (last) user turn. Falls back to a single stateless user prompt when no
+/// conversation memory is present.
+fn ollama_guidance_messages(
+    system: &str,
+    request: &GuidanceRequest,
+) -> ProviderResult<Vec<serde_json::Value>> {
+    let mut messages = vec![json!({"role": "system", "content": system})];
+    let images = &request.context_image_data_urls;
+
+    if request.conversation.is_empty() {
+        let user = prompts::build_user_prompt(request);
+        messages.push(ollama_user_message(&user, images)?);
+        return Ok(messages);
     }
+
+    let last = request.conversation.len() - 1;
+    for (i, turn) in request.conversation.iter().enumerate() {
+        match turn.role {
+            ChatRole::Assistant => {
+                messages.push(json!({"role": "assistant", "content": turn.content}));
+            }
+            ChatRole::User => {
+                if i == last && !images.is_empty() {
+                    messages.push(ollama_user_message(&turn.content, images)?);
+                } else {
+                    messages.push(json!({"role": "user", "content": turn.content}));
+                }
+            }
+        }
+    }
+    Ok(messages)
+}
+
+/// A user message; attaches base64 images (Ollama format) when supplied.
+fn ollama_user_message(text: &str, images: &[String]) -> ProviderResult<serde_json::Value> {
+    if images.is_empty() {
+        return Ok(json!({"role": "user", "content": text}));
+    }
+    let encoded: Result<Vec<String>, ProviderError> = images
+        .iter()
+        .map(|url| parse_image_data_url(url).map(|p| p.base64_payload))
+        .collect();
+    Ok(json!({"role": "user", "content": text, "images": encoded?}))
 }
 
 #[async_trait]
@@ -517,16 +548,13 @@ impl ProviderAdapter for OllamaAdapter {
         self.validate_privacy(request.privacy_mode)?;
         let started = Utc::now();
         let system = prompts::build_system_prompt(request.session_context.system_prompt.as_deref());
-        let user = prompts::build_user_prompt(&request);
         let fallback_type = request
             .suggestion_type
             .unwrap_or(SuggestionType::Answer);
 
-        let completion = if request.context_image_data_urls.is_empty() {
-            self.chat_completion(&system, &user).await
-        } else {
-            self.chat_completion_with_images(&system, &user, &request.context_image_data_urls)
-                .await
+        let completion = match ollama_guidance_messages(&system, &request) {
+            Ok(messages) => self.complete_messages(messages).await,
+            Err(e) => Err(e),
         };
 
         let (text, confidence, suggestion_type, used_stub) =

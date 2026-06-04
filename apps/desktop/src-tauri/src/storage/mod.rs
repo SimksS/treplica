@@ -33,6 +33,10 @@ pub struct AppState {
     /// Per live-session snapshot display (xcap monitor id).
     session_snapshot_monitor: Mutex<HashMap<String, u32>>,
     guidance_in_flight: Mutex<HashSet<String>>,
+    /// Per-session guidance conversation history (the model's "memory" while the
+    /// session is live). Seeded with the session context on the first request and
+    /// cleared when the session ends. Keyed by session id.
+    guidance_memory: Mutex<HashMap<String, Vec<provider_core::ChatTurn>>>,
     pub audio_capture: AudioCaptureState,
     pub native_system_capture: NativeSystemCaptureController,
     pub native_mic_capture: NativeMicCaptureController,
@@ -55,6 +59,7 @@ impl AppState {
             active_session_id: Mutex::new(None),
             session_snapshot_monitor: Mutex::new(HashMap::new()),
             guidance_in_flight: Mutex::new(HashSet::new()),
+            guidance_memory: Mutex::new(HashMap::new()),
             audio_capture: AudioCaptureState::new(),
             native_system_capture: NativeSystemCaptureController::new(),
             native_mic_capture: NativeMicCaptureController::new(),
@@ -77,6 +82,30 @@ impl AppState {
 
     pub fn end_guidance(&self, session_id: &str) {
         if let Ok(mut guard) = self.guidance_in_flight.lock() {
+            guard.remove(session_id);
+        }
+    }
+
+    /// Snapshot of the current guidance conversation memory for a session.
+    pub fn guidance_memory_snapshot(&self, session_id: &str) -> Vec<provider_core::ChatTurn> {
+        self.guidance_memory
+            .lock()
+            .ok()
+            .and_then(|g| g.get(session_id).cloned())
+            .unwrap_or_default()
+    }
+
+    /// Replaces the guidance conversation memory for a session.
+    pub fn set_guidance_memory(&self, session_id: &str, turns: Vec<provider_core::ChatTurn>) {
+        if let Ok(mut guard) = self.guidance_memory.lock() {
+            guard.insert(session_id.to_string(), turns);
+        }
+    }
+
+    /// Drops the guidance conversation memory for a session (e.g. when it ends), so the
+    /// next session starts a fresh conversation with the model.
+    pub fn clear_guidance_memory(&self, session_id: &str) {
+        if let Ok(mut guard) = self.guidance_memory.lock() {
             guard.remove(session_id);
         }
     }

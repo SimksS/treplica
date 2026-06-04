@@ -37,6 +37,7 @@ import type { SessionContextDto } from "../lib/types";
 import {
   useSessionLeavePrompt,
   useSessionLifecycleListeners,
+  useQuitListener,
 } from "../hooks/useSessionLeavePrompt";
 import { prefetchRuntimePlatform } from "../lib/platform";
 import type { AccessibilitySettingsDto } from "../lib/types";
@@ -79,6 +80,7 @@ export function App() {
   const live = useLiveSession();
   const leave = useSessionLeavePrompt(live);
   useSessionLifecycleListeners(live, leave.requestLeave);
+  const quit = useQuitListener();
   const isSettings = view.startsWith("settings-");
 
   const guardedNavigate = useCallback(
@@ -172,6 +174,12 @@ export function App() {
         await live.createAndStart(
           initial && hasUpdateInput(initial) ? initial : undefined,
         );
+        setPendingContext(null);
+      } else if (initial && hasUpdateInput(initial)) {
+        // Sessão já ativa (ex.: sessão anterior re-hidratada): aplica o contexto do
+        // modal — assistente, contexto pré-reunião e anexos — à sessão atual, em vez
+        // de descartá-lo silenciosamente.
+        await live.updateContext(initial);
         setPendingContext(null);
       } else if (pendingContext) {
         await applyContextToNewSession();
@@ -316,6 +324,7 @@ export function App() {
       </main>
 
       {leave.modal}
+      {quit.modal}
 
       <StartMeetingModal
         open={startMeetingOpen}

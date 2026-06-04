@@ -340,7 +340,7 @@ checksum = "1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0"
 
 [[package]]
 name = "audio-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "async-trait",
  "chrono",
@@ -654,7 +654,7 @@ dependencies = [
 
 [[package]]
 name = "contract-tests"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "chrono",
  "local-store",
@@ -2161,7 +2161,7 @@ dependencies = [
 
 [[package]]
 name = "integration-tests"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "chrono",
  "local-store",
@@ -2432,7 +2432,7 @@ checksum = "92daf443525c4cce67b150400bc2316076100ce0b3686209eb8cf3c31612e6f0"
 
 [[package]]
 name = "local-store"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "chrono",
  "rusqlite",
@@ -3403,7 +3403,7 @@ dependencies = [
 
 [[package]]
 name = "provider-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "async-trait",
  "base64 0.22.1",
@@ -5211,7 +5211,7 @@ dependencies = [
 
 [[package]]
 name = "treplica-desktop"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "aes-gcm",
  "audio-core",

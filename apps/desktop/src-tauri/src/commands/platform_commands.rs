@@ -29,3 +29,8 @@ pub fn get_runtime_platform() -> Result<CommandResponse<RuntimePlatformDto>, ()>
         display_name: display_name.into(),
     }))
 }
+
+#[tauri::command]
+pub fn quit_app(app: tauri::AppHandle) {
+    app.exit(0);
+}

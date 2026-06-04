@@ -175,6 +175,9 @@ pub async fn end_session(
             // Clear the guidance lock only after the DB write succeeds so that a DB
             // failure does not leave the lock cleared while the session is still live.
             state.end_guidance(&session_id);
+            // Encerra a "conversa" com a IA: descarta a memória da sessão para que a
+            // próxima sessão comece um diálogo novo, sem contexto da anterior.
+            state.clear_guidance_memory(&session_id);
             // Broadcast to all windows so each window's React state can reset,
             // regardless of which window initiated the end_session call.
             let _ = app.emit("session-ended", &session_id);

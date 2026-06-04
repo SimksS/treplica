@@ -110,6 +110,25 @@ export default function UserGuideDoc() {
           </div>
         </div>
 
+        {/* Memória da Sessão */}
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8">
+          <h3 className="text-xl font-semibold text-white mb-4">Memória da Sessão</h3>
+          <p className="text-muted mb-4">
+            Durante uma reunião, o Treplica mantém uma <strong>conversa contínua</strong> com a IA: o contexto e o material que você forneceu entram logo na primeira orientação e permanecem &ldquo;na memória&rdquo; do modelo até o fim da sessão. As orientações seguintes consideram o que já foi dito antes, em vez de tratar cada pedido isoladamente.
+          </p>
+          <ul className="list-disc pl-6 space-y-2 text-muted">
+            <li>
+              O <strong>contexto da sessão</strong> é fixado no início e continua valendo a cada nova orientação.
+            </li>
+            <li>
+              As respostas são propositalmente <strong>curtas e diretas</strong>, pensadas para leitura de relance enquanto você participa da conversa.
+            </li>
+            <li>
+              Ao <strong>encerrar a sessão</strong>, a conversa com a IA é descartada — a próxima reunião começa do zero, sem misturar contextos.
+            </li>
+          </ul>
+        </div>
+
         {/* Interface e Atalhos */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
@@ -170,6 +189,39 @@ export default function UserGuideDoc() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Executando em segundo plano */}
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8">
+          <h3 className="text-xl font-semibold text-white mb-4">Executando em Segundo Plano</h3>
+          <p className="text-muted mb-4">
+            Ao clicar no <strong>X</strong> para fechar a janela, o Treplica pergunta o que você deseja fazer:
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            <div className="p-4 bg-black/30 border border-white/10 rounded-xl">
+              <strong className="text-white block mb-1">Minimizar</strong>
+              <p className="text-sm text-muted m-0">
+                Mantém o aplicativo ativo em segundo plano. O overlay stealth e os atalhos globais continuam funcionando normalmente.
+              </p>
+            </div>
+            <div className="p-4 bg-black/30 border border-white/10 rounded-xl">
+              <strong className="text-white block mb-1">Sair</strong>
+              <p className="text-sm text-muted m-0">
+                Encerra o processo completamente. Sessões em andamento são salvas antes do fechamento.
+              </p>
+            </div>
+          </div>
+          <p className="text-muted mb-3">
+            Quando minimizado, o Treplica aparece no <strong>ícone da bandeja</strong> (área de notificações no Windows/Linux, barra de menu no macOS). A partir dele você pode:
+          </p>
+          <ul className="list-disc pl-6 space-y-2 text-muted">
+            <li>
+              <strong>Clique no ícone</strong> ou selecione <strong>Abrir Treplica</strong> para restaurar a janela principal.
+            </li>
+            <li>
+              Selecione <strong>Sair</strong> para encerrar o aplicativo sem precisar restaurar a janela.
+            </li>
+          </ul>
         </div>
 
         {/* Após a reunião */}

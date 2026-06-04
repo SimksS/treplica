@@ -15,12 +15,12 @@ use crate::transcription::{
     is_whisper_hallucination, normalize_detected_language, translation_system_prompt,
     translation_user_message, NO_SPEECH_MARKER,
 };
-use crate::vision::{build_vision_user_prompt, parse_image_data_url, VISION_SYSTEM_PROMPT};
+use crate::vision::{build_vision_system_prompt, build_vision_user_prompt, parse_image_data_url};
 use crate::{
-    DocumentGenerationRequest, DocumentGenerationResponse, GuidanceRequest, GuidanceResponse,
-    ProviderAdapter, ProviderCapability, ProviderError, ProviderErrorCode, ProviderKind,
-    ProviderMetadata, ProviderResult, SuggestionType, TranscriptionRequest, TranscriptionResponse,
-    TranslationRequest, TranslationResponse, VisionRequest, VisionResponse,
+    ChatRole, DocumentGenerationRequest, DocumentGenerationResponse, GuidanceRequest,
+    GuidanceResponse, ProviderAdapter, ProviderCapability, ProviderError, ProviderErrorCode,
+    ProviderKind, ProviderMetadata, ProviderResult, SuggestionType, TranscriptionRequest,
+    TranscriptionResponse, TranslationRequest, TranslationResponse, VisionRequest, VisionResponse,
 };
 
 fn shared_http_client() -> &'static reqwest::Client {
@@ -130,6 +130,57 @@ fn sanitize_http_error(operation: &str, status: u16) -> String {
     format!("{operation} request failed with HTTP {status}")
 }
 
+/// Builds the OpenAI chat `messages` array for a guidance request: a system message
+/// followed by the per-session conversation (memory). Context images are attached to
+/// the current (last) user turn. Falls back to a single stateless user prompt when no
+/// conversation memory is present.
+fn openai_guidance_messages(
+    system: &str,
+    request: &GuidanceRequest,
+) -> ProviderResult<Vec<serde_json::Value>> {
+    let mut messages = vec![json!({"role": "system", "content": system})];
+    let images = &request.context_image_data_urls;
+
+    if request.conversation.is_empty() {
+        let user = prompts::build_user_prompt(request);
+        messages.push(openai_user_message(&user, images)?);
+        return Ok(messages);
+    }
+
+    let last = request.conversation.len() - 1;
+    for (i, turn) in request.conversation.iter().enumerate() {
+        match turn.role {
+            ChatRole::Assistant => {
+                messages.push(json!({"role": "assistant", "content": turn.content}));
+            }
+            ChatRole::User => {
+                if i == last && !images.is_empty() {
+                    messages.push(openai_user_message(&turn.content, images)?);
+                } else {
+                    messages.push(json!({"role": "user", "content": turn.content}));
+                }
+            }
+        }
+    }
+    Ok(messages)
+}
+
+/// A user message; multimodal (text + images) when images are supplied.
+fn openai_user_message(text: &str, images: &[String]) -> ProviderResult<serde_json::Value> {
+    if images.is_empty() {
+        return Ok(json!({"role": "user", "content": text}));
+    }
+    let mut content = vec![json!({"type": "text", "text": text})];
+    for url in images {
+        let parsed = parse_image_data_url(url)?;
+        content.push(json!({
+            "type": "image_url",
+            "image_url": {"url": parsed.data_url}
+        }));
+    }
+    Ok(json!({"role": "user", "content": content}))
+}
+
 /// Maps HTTP status from STT endpoints (Whisper / OpenRouter audio).
 pub fn map_transcription_http_status(status: u16, provider_label: &str, _raw: &str) -> ProviderError {
     let code = match status {
@@ -219,6 +270,55 @@ impl OpenAiCompatibleAdapter {
         parse_openai_completions_body(&raw, &self.model)
     }
 
+    /// Posts a pre-built `messages` array (system + conversation history) and parses the reply.
+    async fn complete_messages(
+        &self,
+        messages: Vec<serde_json::Value>,
+    ) -> ProviderResult<String> {
+        if self.base_url.trim().is_empty() {
+            return Err(ProviderError::structured(
+                ProviderErrorCode::InvalidConfiguration,
+                "base_url is required for chat API",
+            ));
+        }
+        if self.model.trim().is_empty() {
+            return Err(ProviderError::structured(
+                ProviderErrorCode::InvalidConfiguration,
+                "model is required for chat API",
+            ));
+        }
+        if !self.is_local && self.api_key.as_ref().is_none_or(|k| k.trim().is_empty()) {
+            return Err(ProviderError::structured(
+                ProviderErrorCode::AuthenticationFailed,
+                "API key is required for hosted providers",
+            ));
+        }
+
+        let url = format!("{}/chat/completions", self.base_url.trim_end_matches('/'));
+        let body = json!({
+            "model": self.model,
+            "stream": false,
+            "max_tokens": prompts::GUIDANCE_MAX_TOKENS,
+            "messages": messages,
+        });
+
+        let mut req = shared_http_client().post(&url).json(&body);
+        if let Some(key) = self.api_key.as_ref().filter(|k| !k.trim().is_empty()) {
+            req = req.header("Authorization", format!("Bearer {key}"));
+        }
+
+        let resp = req.send().await.map_err(map_network)?;
+        if !resp.status().is_success() {
+            let status = resp.status();
+            return Err(ProviderError::structured(
+                ProviderErrorCode::ProviderUnavailable,
+                sanitize_http_error("chat API", status.as_u16()),
+            ));
+        }
+        let raw = resp.text().await.map_err(map_network)?;
+        parse_openai_completions_body(&raw, &self.model)
+    }
+
     async fn vision_chat_completion(
         &self,
         system: &str,
@@ -285,10 +385,7 @@ impl OpenAiCompatibleAdapter {
     pub async fn analyze_image(&self, request: VisionRequest) -> ProviderResult<VisionResponse> {
         self.validate_privacy(request.privacy_mode)?;
         let started = Utc::now();
-        let system = match request.session_context.system_prompt.as_deref() {
-            Some(s) if !s.trim().is_empty() => format!("{VISION_SYSTEM_PROMPT}\n\n{s}"),
-            _ => VISION_SYSTEM_PROMPT.to_string(),
-        };
+        let system = build_vision_system_prompt(request.session_context.system_prompt.as_deref());
         let user = build_vision_user_prompt(
             &request.session_context,
             &request.recent_transcript,
@@ -653,73 +750,6 @@ impl OpenAiCompatibleAdapter {
         }
     }
 
-    async fn vision_chat_completion_multi(
-        &self,
-        system: &str,
-        user: &str,
-        image_data_urls: &[String],
-    ) -> ProviderResult<String> {
-        if image_data_urls.is_empty() {
-            return self.chat_completion(system, user).await;
-        }
-        if self.base_url.trim().is_empty() {
-            return Err(ProviderError::structured(
-                ProviderErrorCode::InvalidConfiguration,
-                "base_url is required for vision API",
-            ));
-        }
-        if self.model.trim().is_empty() {
-            return Err(ProviderError::structured(
-                ProviderErrorCode::InvalidConfiguration,
-                "model is required for vision API",
-            ));
-        }
-        if !self.is_local && self.api_key.as_ref().is_none_or(|k| k.trim().is_empty()) {
-            return Err(ProviderError::structured(
-                ProviderErrorCode::AuthenticationFailed,
-                "API key is required for hosted vision providers",
-            ));
-        }
-
-        let mut content = vec![json!({"type": "text", "text": user})];
-        for url in image_data_urls {
-            let parsed = parse_image_data_url(url)?;
-            content.push(json!({
-                "type": "image_url",
-                "image_url": {"url": parsed.data_url}
-            }));
-        }
-
-        let url = format!(
-            "{}/chat/completions",
-            self.base_url.trim_end_matches('/')
-        );
-        let body = json!({
-            "model": self.model,
-            "stream": false,
-            "messages": [
-                {"role": "system", "content": system},
-                {"role": "user", "content": content}
-            ],
-        });
-
-        let mut req = shared_http_client().post(&url).json(&body);
-        if let Some(key) = self.api_key.as_ref().filter(|k| !k.trim().is_empty()) {
-            req = req.header("Authorization", format!("Bearer {key}"));
-        }
-
-        let resp = req.send().await.map_err(map_network)?;
-        if !resp.status().is_success() {
-            let status = resp.status();
-            return Err(ProviderError::structured(
-                ProviderErrorCode::ProviderUnavailable,
-                sanitize_http_error("vision API", status.as_u16()),
-            ));
-        }
-
-        let raw = resp.text().await.map_err(map_network)?;
-        parse_openai_completions_body(&raw, &self.model)
-    }
 }
 
 #[async_trait]
@@ -753,16 +783,13 @@ impl ProviderAdapter for OpenAiCompatibleAdapter {
         self.validate_privacy(request.privacy_mode)?;
         let started = Utc::now();
         let system = prompts::build_system_prompt(request.session_context.system_prompt.as_deref());
-        let user = prompts::build_user_prompt(&request);
         let fallback_type = request
             .suggestion_type
             .unwrap_or(SuggestionType::Answer);
 
-        let completion = if request.context_image_data_urls.is_empty() {
-            self.chat_completion(&system, &user).await
-        } else {
-            self.vision_chat_completion_multi(&system, &user, &request.context_image_data_urls)
-                .await
+        let completion = match openai_guidance_messages(&system, &request) {
+            Ok(messages) => self.complete_messages(messages).await,
+            Err(e) => Err(e),
         };
 
         let (text, confidence, suggestion_type, used_stub) =
